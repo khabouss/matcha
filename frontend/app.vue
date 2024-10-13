@@ -1,64 +1,69 @@
 <template>
+
   <head>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
   </head>
   <div class="layout">
     <!-- Navbar -->
     <nav class="navbar">
-      <div class="logo">Matcha ♡</div>
+      <div class="logo">Matcha <i class="fas fa-heart"></i></div>
       <div class="navbar-right">
-        <div v-if="isLoggedIn" class="profile-menu">
-          <button @click="toggleProfile" class="profile-button">Profile</button>
-          <div v-if="showProfile" class="dropdown">
-            <button class="dropdown-btn">Settings</button>
-            <button class="dropdown-btn">Logout</button>
-          </div>
-        </div>
-        <button v-else class="signin">Sign In</button>
+        <svg v-if="route.path === '/'" @click="togglePopup" xmlns="http://www.w3.org/2000/svg" width="30px" height="30px" viewBox="0 0 24 24" fill="none">
+          <path fill-rule="evenodd" clip-rule="evenodd"
+            d="M15 10.5A3.502 3.502 0 0 0 18.355 8H21a1 1 0 1 0 0-2h-2.645a3.502 3.502 0 0 0-6.71 0H3a1 1 0 0 0 0 2h8.645A3.502 3.502 0 0 0 15 10.5zM3 16a1 1 0 1 0 0 2h2.145a3.502 3.502 0 0 0 6.71 0H21a1 1 0 1 0 0-2h-9.145a3.502 3.502 0 0 0-6.71 0H3z"
+            fill="#000000" />
+        </svg>
       </div>
     </nav>
 
     <!-- Main Content -->
     <main>
-      <Swipe/>
+      <nuxt-page />
     </main>
 
-<!-- Bottom Navigation -->
-<nav class="bottom-nav">
-  <button @click="goToPage('home')" class="nav-btn">
-    <i class="fas fa-home"></i><span> Home</span>
-  </button>
-  <button @click="goToPage('search')" class="nav-btn">
-    <i class="fas fa-search"></i><span> Search</span>
-  </button>
-  <button @click="goToPage('matches')" class="nav-btn">
-    <i class="fas fa-heart"></i><span> Matches</span>
-  </button>
-  <button @click="goToPage('messages')" class="nav-btn">
-    <i class="fas fa-envelope"></i><span> Messages</span>
-  </button>
-  <button @click="goToPage('profile')" class="nav-btn">
-    <i class="fas fa-user"></i><span> Profile</span>
-  </button>
-</nav>
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+      <button @click="goToPage('')" class="nav-btn">
+        <i class="fas fa-heart"></i><span> Matches</span>
+      </button>
+      <hr style="width: 1px; height: 20px; display: inline-block;">
+      <button @click="goToPage('profile')" class="nav-btn">
+        <i class="fas fa-user"></i><span> Profile</span>
+      </button>
+      <hr style="width: 1px; height: 20px; display: inline-block;">
+      <button @click="goToPage('chat')" class="nav-btn">
+        <i class="fas fa-envelope"></i><span> Chat</span>
+      </button>
+    </nav>
 
-
+    <filter-popup class="popup" v-if="showPopup" @close="togglePopup" @apply-filters="handleFilters" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import Swipe from './pages/Swipe.vue'
 
-const isLoggedIn = ref(false); // Change to `true` when logged in
+const isLoggedIn = ref(true); // Change to `true` when logged in
 const showProfile = ref(false);
+const showPopup = ref(false);
+const route = useRoute();
 
 const toggleProfile = () => {
   showProfile.value = !showProfile.value;
 };
 
-const goToPage = (page:string) => {
-  console.log(`Navigating to ${page}`);
+function togglePopup() {
+  showPopup.value = !showPopup.value;
+}
+
+function handleFilters(filters: object) {
+  // Process the filters received from the SortFilterPopup component
+  console.log('Filters applied:', filters);
+  // Implement your filtering logic here
+}
+
+const goToPage = (page: string) => {
+  window.location.href = '/' + page;
 };
 </script>
 
@@ -74,6 +79,7 @@ body {
   margin: 0;
   padding: 0;
 }
+
 
 .layout {
   display: flex;
@@ -147,6 +153,7 @@ body {
     opacity: 0;
     transform: translateY(-10px);
   }
+
   100% {
     opacity: 1;
     transform: translateY(0);
@@ -203,6 +210,14 @@ body {
   background-color: #fff;
   box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
   transition: background-color 0.3s ease-in-out;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60px; /* Adjust as necessary */
+  background-color: #fff; /* Example background color */
+  z-index: 10; /* Ensure it's on top of other content */
+  padding-bottom: calc(env(safe-area-inset-bottom) + 10px); /* Adjust for the safe area and provide some space */
 }
 
 .bottom-nav:hover {
@@ -212,10 +227,17 @@ body {
 .nav-btn {
   background: none;
   border: none;
-  height: 40px;
+  height: 60px;
+  width: 60px;
   color: #333;
   cursor: pointer;
-
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-content: center;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 3px;
   transition: color 0.3s ease, transform 0.3s ease;
 }
 
@@ -227,7 +249,7 @@ body {
 /* Main Content */
 main {
   flex-grow: 1;
-  padding: 1.5rem;
+  padding: 1rem;
 }
 
 /* Responsive Design */
@@ -238,22 +260,18 @@ main {
   }
 
   .nav-btn {
-    height: 40px;
     font-size: 1.0rem;
   }
 
-  
+
 }
 
 @media (max-width: 600px) {
 
-  .nav-btn span {
-    display: none; /* Hide text */
+  .nav-btn {
+    justify-content: center;
+    /* Center icon in button */
   }
 
-  .nav-btn {
-    justify-content: center; /* Center icon in button */
-  }
-  
 }
 </style>
