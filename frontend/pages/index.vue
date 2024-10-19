@@ -1,23 +1,25 @@
 <template>
-  <div class="swipe-container">
-    <div class="profile-card" v-for="(profile, index) in profiles" :key="index" :style="{
-      zIndex: profiles.length - index,
-      transform: `translateX(${profile.offsetX}px) rotate(${profile.rotate}deg)`,
-      opacity: profile.opacity
-    }" @mousedown="startSwipe($event, profile, index)" @touchstart="startSwipe($event, profile, index)">
-      <profile-card :profile="profile" />
-    </div>
+  <NuxtLayout>
+    <div class="swipe-container">
+      <div class="profile-card" v-for="(profile, index) in profiles" :key="index" :style="{
+        zIndex: profiles.length - index,
+        transform: `translateX(${profile.offsetX}px) rotate(${profile.rotate}deg)`,
+        opacity: profile.opacity
+      }" @mousedown="startSwipe($event, profile, index)" @touchstart="startSwipe($event, profile, index)">
+        <profile-card :profile="profile" />
+      </div>
 
-    <!-- Swipe Buttons (inside container) -->
-    <div class="swipe-buttons" v-if="false">
-      <button class="swipe-btn dislike-btn" @click="manualSwipe('dislike')">
-        <i class="fas fa-times"></i>
-      </button>
-      <button class="swipe-btn like-btn" @click="manualSwipe('like')">
-        <i class="fas fa-heart"></i>
-      </button>
+      <!-- Swipe Buttons (inside container) -->
+      <div class="swipe-buttons" v-if="false">
+        <button class="swipe-btn dislike-btn" @click="manualSwipe('dislike')">
+          <i class="fas fa-times"></i>
+        </button>
+        <button class="swipe-btn like-btn" @click="manualSwipe('like')">
+          <i class="fas fa-heart"></i>
+        </button>
+      </div>
     </div>
-  </div>
+  </NuxtLayout>
 </template>
 
 <script setup>
@@ -139,8 +141,10 @@ const manualSwipe = (direction) => {
 }
 
 .profile-card {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
 }
 
 /* Swipe Buttons inside the container */

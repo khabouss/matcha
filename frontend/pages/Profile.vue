@@ -1,111 +1,100 @@
 <template>
-  <div class="profile-page">
-    <header class="header">
-      <h1>{{ user.firstName }}'s Profile</h1>
-    </header>
+  <NuxtLayout>
 
-    <section class="image-grid">
-      <h2>Add Pictures</h2>
-      <div class="grid">
-        <div
-          class="grid-item"
-          v-for="(image, index) in gridImages"
-          :key="index"
-          @click="uploadImage(index)"
-        >
-          <img v-if="image" :src="image" alt="Image Upload" />
-          <div v-else class="placeholder">
-            <!-- SVG Placeholder -->
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 100 100"
-              class="svg-placeholder"
-            >
-              <circle cx="50" cy="50" r="45" fill="#e9ecef" />
-              <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#aaa">
-                Upload
-              </text>
-            </svg>
+    <div class="profile-page">
+      <header class="header">
+        <h1>{{ user.firstName }}'s Profile</h1>
+      </header>
+
+      <section class="image-grid">
+        <h2>Add Pictures</h2>
+        <div class="grid">
+          <div class="grid-item" v-for="(image, index) in gridImages" :key="index" @click="uploadImage(index)">
+            <img v-if="image" :src="image" alt="Image Upload" />
+            <div v-else class="placeholder">
+              <!-- SVG Placeholder -->
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" class="svg-placeholder">
+                <circle cx="50" cy="50" r="45" fill="#e9ecef" />
+                <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#aaa">
+                  Upload
+                </text>
+              </svg>
+            </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <section class="profile-info">
-      <form @submit.prevent="updateProfile" class="profile-form">
-        <div class="form-group">
-          <label for="firstName">First Name:</label>
-          <input v-model="user.firstName" type="text" id="firstName" required />
-        </div>
+      <section class="profile-info">
+        <form @submit.prevent="updateProfile" class="profile-form">
+          <div class="form-group">
+            <label for="firstName">First Name:</label>
+            <input v-model="user.firstName" type="text" id="firstName" required />
+          </div>
 
-        <div class="form-group">
-          <label for="lastName">Last Name:</label>
-          <input v-model="user.lastName" type="text" id="lastName" required />
-        </div>
+          <div class="form-group">
+            <label for="lastName">Last Name:</label>
+            <input v-model="user.lastName" type="text" id="lastName" required />
+          </div>
 
-        <div class="form-group">
-          <label for="email">Email:</label>
-          <input v-model="user.email" type="email" id="email" required />
-        </div>
+          <div class="form-group">
+            <label for="email">Email:</label>
+            <input v-model="user.email" type="email" id="email" required />
+          </div>
 
-        <div class="form-group">
-          <label for="gender">Gender:</label>
-          <select v-model="user.gender" id="gender" required>
-            <option value="male">Male</option>
-            <option value="female">Female</option>
-            <option value="other">Other</option>
-          </select>
-        </div>
+          <div class="form-group">
+            <label for="gender">Gender:</label>
+            <select v-model="user.gender" id="gender" required>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
 
-        <div class="form-group">
-          <label for="sexualPreferences">Sexual Preferences:</label>
-          <select v-model="user.sexualPreferences" id="sexualPreferences" required>
-            <option value="heterosexual">Heterosexual</option>
-            <option value="homosexual">Homosexual</option>
-            <option value="bisexual">Bisexual</option>
-            <option value="pansexual">Pansexual</option>
-            <option value="asexual">Asexual</option>
-          </select>
-        </div>
+          <div class="form-group">
+            <label for="sexualPreferences">Sexual Preferences:</label>
+            <select v-model="user.sexualPreferences" id="sexualPreferences" required>
+              <option value="heterosexual">Heterosexual</option>
+              <option value="homosexual">Homosexual</option>
+              <option value="bisexual">Bisexual</option>
+              <option value="pansexual">Pansexual</option>
+              <option value="asexual">Asexual</option>
+            </select>
+          </div>
 
-        <div class="form-group">
-          <label for="biography">Biography:</label>
-          <textarea v-model="user.biography" id="biography" required></textarea>
-        </div>
+          <div class="form-group">
+            <label for="biography">Biography:</label>
+            <textarea v-model="user.biography" id="biography" required></textarea>
+          </div>
 
-        <div class="form-group">
-          <label for="interests">Interests:</label>
-          <input v-model="newInterest" @keyup.enter="addInterest" placeholder="Add interest and press Enter" />
-          <div class="tags">
-            <span v-for="interest in user.interests" :key="interest" class="tag">#{{ interest }}</span>
+          <div class="form-group">
+            <label for="interests">Interests:</label>
+            <input v-model="newInterest" @keyup.enter="addInterest" placeholder="Add interest and press Enter" />
+            <div class="tags">
+              <span v-for="interest in user.interests" :key="interest" class="tag">#{{ interest }}</span>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-update">Update Profile</button>
+        </form>
+      </section>
+
+      <section class="profile-stats">
+        <h2 style="margin-bottom: 5px;">Profile Stats</h2>
+        <p><strong>Likes:</strong> {{ likes.length }}</p>
+        <p><strong>Fame Rating:</strong> {{ fameRating }}</p>
+        <h3>Profiles Who Viewed This Profile</h3>
+        <div class="viewed-profiles">
+          <div class="profile-item" v-for="profile in viewedProfiles" :key="profile.id" @click="viewProfile(profile)">
+            <img :src="profile.image" alt="Profile Picture" class="profile-image" />
+            <div style="display: flex; flex-direction: column;">
+              <h4>{{ profile.name }}</h4>
+              <span style="font-size: small;">{{ profile.gender }}</span>
+            </div>
           </div>
         </div>
-
-        <button type="submit" class="btn-update">Update Profile</button>
-      </form>
-    </section>
-
-    <section class="profile-stats">
-      <h2 style="margin-bottom: 5px;">Profile Stats</h2>
-      <p><strong>Likes:</strong> {{ likes.length }}</p>
-      <p><strong>Fame Rating:</strong> {{ fameRating }}</p>
-      <h3>Profiles Who Viewed This Profile</h3>
-      <div class="viewed-profiles">
-        <div
-          class="profile-item"
-          v-for="profile in viewedProfiles"
-          :key="profile.id"
-          @click="viewProfile(profile)"
-        >
-          <img :src="profile.image" alt="Profile Picture" class="profile-image" />
-          <div style="display: flex; flex-direction: column;">
-            <h4>{{ profile.name }}</h4>
-            <span style="font-size: small;">{{ profile.gender }}</span>
-          </div>
-        </div>
-      </div>
-    </section>
-  </div>
+      </section>
+    </div>
+  </NuxtLayout>
 </template>
 
 <script setup>
@@ -196,6 +185,7 @@ const viewProfile = (profile) => {
   text-align: center;
   margin-bottom: 20px;
 }
+
 .image-grid {
   margin-top: 30px;
 }
