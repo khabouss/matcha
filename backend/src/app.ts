@@ -23,6 +23,6 @@ attachProfileRoute(profileRouter);
 
 app.use('/auth', authRouter);
 app.use('/profile', profileRouter);
-app.use
+
 
 export default app;
