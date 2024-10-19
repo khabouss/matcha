@@ -8,7 +8,6 @@
             <div class="logo">
                 <h2>Matcha <i class="fas fa-heart"></i></h2>
             </div>
-            {{ signinData }}
             <form class="sign-in-form">
                 <div class="input-group">
                     <input v-model="email" type="email" placeholder="Email" required />
@@ -43,17 +42,46 @@ const email = ref('');
 const password = ref('');
 const signinData = ref(null);
 
-async function handleSignin(e) {
-    e.preventDefault();
-    const { data, status, error, refresh } = await useFetch('http://localhost:3001/auth/sign-in', {
-        body: {
-            "username": "khabouss",
-            "password": "oooo9999"
-        },
-        method: 'POST'
-    })
-    signinData.value = data;
-    console.log(error);
+type SignInResponse = {
+  status: string;
+  data: {
+    message: string;
+    accesstoken: string;
+    refreshToken: string;
+    data: {
+      id: number;
+      email: string;
+      firstName: string;
+      lastName: string;
+      isVerfied: boolean;
+      hasProfile: boolean | undefined;
+    };
+  };
+};
+
+
+async function handleSignin(e: MouseEvent) {
+    try {
+        e.preventDefault();
+        const { data, status, error, refresh } = await useFetch('http://localhost:3001/auth/sign-in', {
+            body: {
+                "username": email.value,
+                "password": password.value
+            },
+            method: 'POST'
+        })
+        const response = data.value as SignInResponse;
+        if (response.status === 'success') {
+            useCookie('access_token').value = response.data.accesstoken;
+            useCookie('refresh_token').value = response.data.refreshToken;
+            window.location.href = response.data.data.hasProfile !== undefined ? '/' : '/completeprofile';
+        }
+        if (error.value) {
+            console.error(error.value);
+        }
+    } catch (e) {
+        console.error(e);
+    } 
     
 }
 </script>
