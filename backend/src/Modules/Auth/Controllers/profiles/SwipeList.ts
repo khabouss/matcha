@@ -143,9 +143,8 @@ const swipeList = async (req: Request, res: Response, next: NextFunction) => {
             status: 'success',
             data: {
                 message: 'Swipe list fetched successfully!',
-                data: {
-                    swipeList: swipeData,
-                },
+
+                swipeList: swipeData,
             },
         });
     } catch (error: any) {
