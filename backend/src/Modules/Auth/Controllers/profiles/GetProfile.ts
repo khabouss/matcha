@@ -6,9 +6,9 @@ const GetProfileUsers = async (
     res: Response,
     next: NextFunction
 ) => {
-    const profileId = req.params.profileId;
+    const profileUserName = req.params.profileUserName;
 
-    console.log('profileId: ', profileId);
+    console.log('profileId: ', profileUserName);
     console.log('user: ', req.user);
     if (!req.user) {
         res.status(401).json({
@@ -20,9 +20,7 @@ const GetProfileUsers = async (
     const viewerId = req.user.id; // get the user id from the token
 
     try {
-        const profile = await ProfileServices.getProfileUsers(
-            Number(profileId)
-        );
+        const profile = await ProfileServices.getProfileUsers(profileUserName);
         if (!profile) {
             res.status(404).json({
                 status: 'error',
@@ -30,8 +28,11 @@ const GetProfileUsers = async (
             });
             return;
         }
-        if (Number(profileId) !== viewerId) {
-            await ProfileServices.setViewerProfile(Number(profileId), viewerId);
+        if (Number(profile.id) !== viewerId) {
+            await ProfileServices.setViewerProfile(
+                Number(profile.id),
+                viewerId
+            );
         }
 
         const { user_id, gps_location, allow_gps, ...returndata } = profile;

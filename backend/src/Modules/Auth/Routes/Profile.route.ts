@@ -11,7 +11,7 @@ const attachProfileRoute = (router: Router) => {
     router.get('/me', authMiddleware, myProfile);
     router.get('/swipe-list',authMiddleware, swipeList);
     router.get('/me/viewers', authMiddleware, whoViewedProfile);
-    router.get('/:profileId', authMiddleware, GetProfileUsers);
+    router.get('/:profileUserName', authMiddleware, GetProfileUsers);
 };
 
 export default attachProfileRoute;

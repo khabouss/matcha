@@ -75,6 +75,17 @@ class profileRepository {
         const row = await pool.query(query, values);
         return row.rows;
     }
+
+    static async findProfileByUserNume(user_name: string) {
+        const query = `
+            SELECT * FROM profiles
+            JOIN users ON profiles.user_id = users.id
+            WHERE users.username = $1
+        `;
+        const values = [user_name];
+        const row = await pool.query(query, values);
+        return row.rows[0];
+    }
 }
 
 export default profileRepository;

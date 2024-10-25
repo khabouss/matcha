@@ -26,8 +26,9 @@ class ProfileServices {
         }
         return findProfile;
     }
-    static async getProfileUsers(profileId: number) {
-        const findProfile = await profileRepository.findProfileById(profileId);
+    static async getProfileUsers(profileId: string) {
+        // const findProfile = await profileRepository.findProfileById(profileId);
+        const findProfile = await profileRepository.findProfileByUserNume(profileId);
         if (!findProfile) {
             throw new MatchaError('Profile not found', 404);
         }
