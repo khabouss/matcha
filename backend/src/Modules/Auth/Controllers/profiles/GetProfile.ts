@@ -36,7 +36,7 @@ const GetProfileUsers = async (
 
         const { user_id, gps_location, allow_gps, ...returndata } = profile;
         const resData = {
-            name: 'Alice',
+            name: 'Alice khabouss',
             isMatch: true,
             lastOnlineStatus: 'Two weeks ago',
             about: {
