@@ -9,7 +9,7 @@ import swipeList from '../Controllers/profiles/SwipeList';
 const attachProfileRoute = (router: Router) => {
     router.post('/', authMiddleware, createProfileController);
     router.get('/me', authMiddleware, myProfile);
-    router.get('/swipe-list', swipeList);
+    router.get('/swipe-list',authMiddleware, swipeList);
     router.get('/me/viewers', authMiddleware, whoViewedProfile);
     router.get('/:profileId', authMiddleware, GetProfileUsers);
 };
