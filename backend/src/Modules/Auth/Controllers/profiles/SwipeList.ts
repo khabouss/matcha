@@ -5,6 +5,7 @@ const swipeList = async (req: Request, res: Response, next: NextFunction) => {
         const swipeData = [
             {
                 name: 'Alice',
+                username: 'khabouss',
                 isMatch: true,
                 lastOnlineStatus: 'Two weeks ago',
                 about: {
@@ -32,6 +33,7 @@ const swipeList = async (req: Request, res: Response, next: NextFunction) => {
             },
             {
                 name: 'Bob',
+                username: 'majdahim',
                 isMatch: false,
                 lastOnlineStatus: 'online',
                 about: {
