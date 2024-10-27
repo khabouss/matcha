@@ -46,8 +46,11 @@ onMounted(async () => {
             body: { token }
         })
         console.log(response);
-        if (response.success) {
+        if (response.status === 'success') {
             verified.value = true
+            setTimeout(() => {
+                window.location.href = '/signin';
+            }, 3000)
         } else {
             verified.value = false
         }
