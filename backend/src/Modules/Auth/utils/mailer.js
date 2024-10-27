@@ -6,7 +6,7 @@ const apiKey = Brevo.ApiClient.instance.authentications['api-key'];
 apiKey.apiKey = process.env.BREVO_API_KEY;
 
 const sendEmails = async (recipientEmail, verificationToken, type) => {
-    const verificationUrl = `http://your-frontend-url.com/verify?token=${verificationToken}`; // Adjust this to your frontend URL
+    const verificationUrl = `http://localhost:3000/verify?token=${verificationToken}`; // Adjust this to your frontend URL
     const resetPassword = `
         <h1>Reset Password</h1>
         <p>You have requested to reset your password.</p>
