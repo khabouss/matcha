@@ -8,7 +8,6 @@
       }" @mousedown="startSwipe($event, profile, index)" @touchstart="startSwipe($event, profile, index)">
         <profile-card :profile="profile" />
       </div>
-
       <!-- Swipe Buttons (inside container) -->
       <div class="swipe-buttons" v-if="false">
         <button class="swipe-btn dislike-btn" @click="manualSwipe('dislike')">
@@ -25,21 +24,18 @@
 <script setup>
 import { ref, reactive } from 'vue';
 
-// Sample profile data with random picsum images
-const profiles = ref([
-  { name: 'Alice', isMatch: true, lastOnlineStatus: 'Two weeks ago', about: { gender: 'Man', SP: 'Straight', interest1: 'Jogging', interest2: 'Coffee', intereset3: 'Movies', fame: 'fame: 3.12' }, languages: ['english', 'arabic', 'russian'], lastLocation: 'Marrakech', age: 25, bio: 'Love traveling and photography.', image: ['https://picsum.photos/400/600?random=1', 'https://picsum.photos/400/600?random=1', 'https://picsum.photos/400/600?random=1', 'https://picsum.photos/400/600?random=1', 'https://picsum.photos/400/600?random=1'], offsetX: 0, rotate: 0, opacity: 1 },
-  { name: 'Bob', isMatch: false, lastOnlineStatus: 'online', about: { gender: 'Man', SP: 'Straight', interest1: 'Jogging', interest2: 'Coffee', intereset3: 'Movies', fame: 'fame: 3.12' }, languages: ['english', 'arabic', 'russian'], lastLocation: 'Marrakech', age: 30, bio: 'Avid hiker and coffee enthusiast.', image: ['https://picsum.photos/400/600?random=2', 'https://picsum.photos/400/600?random=2', 'https://picsum.photos/400/600?random=2', 'https://picsum.photos/400/600?random=2', 'https://picsum.photos/400/600?random=2'], offsetX: 0, rotate: 0, opacity: 1 },
-  { name: 'Clara', isMatch: false, lastOnlineStatus: 'online', about: { gender: 'Man', SP: 'Straight', interest1: 'Jogging', interest2: 'Coffee', intereset3: 'Movies', fame: 'fame: 3.12' }, languages: ['english', 'arabic', 'russian'], lastLocation: 'Marrakech', age: 28, bio: 'Book lover and food explorer.', image: ['https://picsum.photos/400/600?random=3', 'https://picsum.photos/400/600?random=3', 'https://picsum.photos/400/600?random=3', 'https://picsum.photos/400/600?random=3', 'https://picsum.photos/400/600?random=3'], offsetX: 0, rotate: 0, opacity: 1 },
-  { name: 'samuel', isMatch: false, lastOnlineStatus: 'online', about: { gender: 'Man', SP: 'Straight', interest1: 'Jogging', interest2: 'Coffee', intereset3: 'Movies', fame: 'fame: 3.12' }, languages: ['english', 'arabic', 'russian'], lastLocation: 'Marrakech', age: 28, bio: 'Book lover and food explorer.', image: ['https://picsum.photos/400/600?random=4', 'https://picsum.photos/400/600?random=4', 'https://picsum.photos/400/600?random=4', 'https://picsum.photos/400/600?random=4', 'https://picsum.photos/400/600?random=4'], offsetX: 0, rotate: 0, opacity: 1 },
-  { name: 'jackson', isMatch: false, lastOnlineStatus: 'online', about: { gender: 'Man', SP: 'Straight', interest1: 'Jogging', interest2: 'Coffee', intereset3: 'Movies', fame: 'fame: 3.12' }, languages: ['english', 'arabic', 'russian'], lastLocation: 'Marrakech', age: 28, bio: 'Book lover and food explorer.', image: ['https://picsum.photos/400/600?random=5', 'https://picsum.photos/400/600?random=5', 'https://picsum.photos/400/600?random=5', 'https://picsum.photos/400/600?random=5', 'https://picsum.photos/400/600?random=5'], offsetX: 0, rotate: 0, opacity: 1 },
-]);
-
+const profiles = ref([]);
 const currentIndex = ref(0);
 const swipeData = reactive({
   startX: 0,
   currentX: 0,
   dragging: false,
 });
+
+const {data, error} = await useCFetch('http://backend:3001/profile/swipe-list', { method: 'GET' });
+if (data.value?.status === 'success') {
+  profiles.value = data?.value?.data?.swipeList;
+}
 
 const startSwipe = (event, profile, index) => {
   swipeData.startX = event.type === 'mousedown' ? event.clientX : event.touches[0].clientX;

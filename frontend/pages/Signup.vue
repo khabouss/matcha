@@ -1,9 +1,10 @@
 <template>
+
     <head>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     </head>
     <div class="sign-up-page">
-        <div class="container">
+        <div class="container" v-if="!verify">
 
             <div class="logo">
                 <h2>Matcha <i class="fas fa-heart"></i></h2>
@@ -11,15 +12,15 @@
 
             <form class="sign-up-form">
                 <div class="input-group">
-                    <input type="text" placeholder="Username" required />
-                    <input type="text" placeholder="First Name" required />
-                    <input type="text" placeholder="Last Name" required />
-                    <input type="email" placeholder="Email" required />
-                    <input type="password" placeholder="Password" required />
-                    <input type="password" placeholder="Re enter password" required />
+                    <input type="text" v-model="userName" placeholder="Username" required />
+                    <input type="text" v-model="firstName" placeholder="First Name" required />
+                    <input type="text" v-model="lastName" placeholder="Last Name" required />
+                    <input type="email" v-model="email" placeholder="Email" required />
+                    <input type="password" v-model="password" placeholder="Password" required />
+                    <input type="password" v-model="confirmPassword" placeholder="Re enter password" required />
                 </div>
 
-                <button class="sign-up-button">Sign Up</button>
+                <button class="sign-up-button" @click="handleSignup">Sign Up</button>
 
                 <div class="social-sign-up">
                     <button class="google-sign-up">Sign up with Google</button>
@@ -31,10 +32,58 @@
                 <p>You have an account? <a href="/signin">Sign in</a></p>
             </div>
         </div>
+        <div class="container" v-else>
+            <verify-your-email/>
+        </div>
     </div>
 </template>
 
-<script setup>
+<script lang="ts" setup>
+import { useCFetch } from '~/composables/useCFetch';
+
+const userName = ref('')
+const firstName = ref('')
+const lastName = ref('')
+const email = ref('')
+const password = ref('')
+const confirmPassword = ref('')
+
+const verify = ref(false);
+
+type SignUpResponse = {
+    status: string;
+};
+
+
+async function handleSignup(e: MouseEvent) {
+    try {
+        e.preventDefault();
+        const { data, error } = await useCFetch('http://localhost:3001/auth/sign-up', {
+            body: {
+                "userName": userName.value,
+                "firstName": firstName.value,
+                "lastName": lastName.value,
+                "email": email.value,
+                "password": password.value,
+            }
+            ,
+            method: 'POST'
+        })
+
+        const response = data.value as SignUpResponse;
+
+        if (error.value) {            
+            alert(error.value.data.error)
+        }
+
+        if (response.status === 'success') {
+            verify.value = true;
+        }
+    } catch (e) {
+        console.error(e);
+    }
+
+}
 </script>
 
 <style scoped>

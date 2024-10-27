@@ -41,10 +41,11 @@ onMounted(async () => {
     const token = router.currentRoute.value.query.token
     try {
         // Send the token to the backend for verification
-        const response = await $fetch('/api/verify-account', {
+        const response = await $fetch('http://localhost:3001/auth/verify-account', {
             method: 'POST',
             body: { token }
         })
+        console.log(response);
         if (response.success) {
             verified.value = true
         } else {

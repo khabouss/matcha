@@ -31,13 +31,15 @@
             </form>
 
             <div class="footer">
-                <p>Don't have an account? <a href="/sign-up">Sign up</a></p>
+                <p>Don't have an account? <a href="/signup">Sign up</a></p>
             </div>
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
+import { useCFetch } from '~/composables/useCFetch';
+
 const email = ref('');
 const password = ref('');
 const signinData = ref(null);
@@ -63,21 +65,24 @@ type SignInResponse = {
 async function handleSignin(e: MouseEvent) {
     try {
         e.preventDefault();
-        const { data, status, error, refresh } = await useFetch('http://localhost:3001/auth/sign-in', {
+        const {data, error} = await useCFetch('http://localhost:3001/auth/sign-in', {
             body: {
                 "username": email.value,
                 "password": password.value
             },
             method: 'POST'
         })
+
         const response = data.value as SignInResponse;
+
+        if (error.value) {
+            console.error(error.value);
+        }
+        
         if (response.status === 'success') {
             useCookie('access_token').value = response.data.accesstoken;
             useCookie('refresh_token').value = response.data.refreshToken;
             window.location.href = response.data.data.hasProfile !== undefined ? '/' : '/completeprofile';
-        }
-        if (error.value) {
-            console.error(error.value);
         }
     } catch (e) {
         console.error(e);
