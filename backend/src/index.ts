@@ -1,7 +1,7 @@
 import app from './app';
 import { createSchemas } from './db';
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 
 // app.listen(PORT, () => {
 

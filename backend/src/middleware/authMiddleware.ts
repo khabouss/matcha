@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import { UserRepository } from '../Modules/Auth/repositories/userRepository';
+import profileRepository from '../Modules/Auth/repositories/profileRepository';
 
 export const authMiddleware = async (
     req: Request,
@@ -31,6 +32,21 @@ export const authMiddleware = async (
         if (!users) {
             req.user = null;
             return next();
+        }
+        console.error('users', users);
+
+        const profileUser = await profileRepository.findProfileByUserId(
+            users.id
+        );
+
+        if (!profileUser) {
+            console.log('profileUser', profileUser);
+
+            res.status(422).json({
+                status: 'error',
+                error_message: 'PROFILE_NOT_COMPLETED',
+            });
+            return;
         }
         req.user = {
             id: users.id,
