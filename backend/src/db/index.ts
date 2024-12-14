@@ -11,7 +11,10 @@ const pool = new Pool({
 
 // Central function to create all schemas
 export const createSchemas = async () => {
+    console.log('Creating schemas...');
+    
     await createUserSchema();
+    
 };
 
 export default pool;

@@ -3,6 +3,12 @@ import jwt, { JwtPayload } from 'jsonwebtoken';
 import { UserRepository } from '../Modules/Auth/repositories/userRepository';
 import profileRepository from '../Modules/Auth/repositories/profileRepository';
 
+import multer from 'multer';
+
+// Set up multer for file upload
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
+
 export const authMiddleware = async (
     req: Request,
     res: Response,
@@ -62,3 +68,15 @@ export const authMiddleware = async (
         return;
     }
 };
+
+
+export const uploadImagesMiddleware = (fieldName: string, maxFiles: number) => {
+    return (req: Request, res: Response, next: NextFunction) => {
+        upload.array(fieldName, maxFiles)(req, res, (err) => {
+            if (err) {
+                return res.status(400).send('Error during file upload.');
+            }
+            next();
+        });
+    };
+}

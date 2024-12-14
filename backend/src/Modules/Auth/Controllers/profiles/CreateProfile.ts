@@ -1,6 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import ProfileServices from '../../services/ProfileServices';
-
+import { s3Client } from '../../../..';
+import { PutObjectCommand } from '@aws-sdk/client-s3';
+const bucketName = 'test-bucket';
 const createProfileController = async (
     req: Request,
     res: Response,
@@ -19,6 +21,7 @@ const createProfileController = async (
     } = req.body;
 
     console.log('req.body: ', req.body);
+    const uploadedFiles = [];
 
     try {
         if (!req.user) {
@@ -28,6 +31,33 @@ const createProfileController = async (
             });
             return;
         }
+        if (Array.isArray(req.files) && req.files.length > 0) {
+            const files = req.files as Express.Multer.File[];
+            
+      
+            // Process each uploaded file (e.g., upload to S3)
+            for (const file of files) {
+              const fileName = `${Date.now()}-${file.originalname}`;
+              const params = {
+                Bucket: bucketName,
+                Key: fileName,
+                Body: file.buffer,
+              };
+      
+              // Upload the file to S3 (using your s3Client logic)
+              const data = await s3Client.send(new PutObjectCommand(params));
+              console.log('File uploaded successfully:', data);
+      
+              uploadedFiles.push({
+                fileName: fileName,
+                fileUrl: `http://localhost:4566/${bucketName}/${fileName}`, // Adjust for AWS or LocalStack
+              });
+            }
+        }
+
+        
+        const images = uploadedFiles.map((file) => file.fileUrl);
+        console.log('images: ', images);
         const dataProfile = {
             user_id: req.user.id,
             gender,
