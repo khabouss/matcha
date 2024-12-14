@@ -45,15 +45,15 @@ export const authMiddleware = async (
             users.id
         );
 
-        if (!profileUser) {
-            console.log('profileUser', profileUser);
+        // if (!profileUser) {
+        //     console.log('profileUser', profileUser);
 
-            res.status(422).json({
-                status: 'error',
-                error_message: 'PROFILE_NOT_COMPLETED',
-            });
-            return;
-        }
+        //     res.status(422).json({
+        //         status: 'error',
+        //         error_message: 'PROFILE_NOT_COMPLETED',
+        //     });
+        //     return;
+        // }
         req.user = {
             id: users.id,
             email: users.email,

@@ -31,6 +31,19 @@ const createProfileController = async (
             });
             return;
         }
+        // Check if files were uploaded
+        const files = req.files || (req.file ? [req.file] : []);
+        console.log('files: ', files);
+
+        if (files.length === 0) {
+            res.status(400).json({
+                status: 'error',
+                error_message: 'No files uploaded',
+            });
+        }
+
+        
+
         if (Array.isArray(req.files) && req.files.length > 0) {
             const files = req.files as Express.Multer.File[];
             
@@ -74,6 +87,7 @@ const createProfileController = async (
             status: 'success',
             data: {
                 message: 'Profile created successfully!',
+                uploadedFiles,
             },
         });
     } catch (error: any) {
