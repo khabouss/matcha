@@ -1,13 +1,11 @@
-// composables/useCFetch.ts
 import { useFetch } from "nuxt/app";
 import { useRouter } from "nuxt/app";
 
 export async function useCFetch(url: string, options: any = {}): Promise<{data: any | null, error: any | null}> {
   const router = useRouter();
   const token = useCookie("access_token");
-  const refreshToken = useCookie("refresh_token"); // Store refresh token in cookies
+  const refreshToken = useCookie("refresh_token");
 
-  // Helper function to refresh the access token
   async function refreshAccessToken() {
     try {
       const { data, error } = await useFetch("http://backend:3001/auth/refresh-token", {
@@ -39,7 +37,7 @@ export async function useCFetch(url: string, options: any = {}): Promise<{data: 
 
   if (error?.value) {
     console.log(error.value);
-    
+
     if (error.value.statusCode === 401) {
       const newToken = await refreshAccessToken();
 
@@ -49,6 +47,11 @@ export async function useCFetch(url: string, options: any = {}): Promise<{data: 
         return useCFetch(url, options);
       }
     }
+
+    if (error.value.statusCode === 422) {
+      router.push('/completeprofile');
+    }
+
   }
 
   return {data: data, error: error};
