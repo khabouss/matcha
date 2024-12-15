@@ -1,5 +1,5 @@
-import { Pool } from 'pg';
-import pool from '.';
+import { Pool } from "pg";
+import pool from ".";
 
 const createUserTable = `
     CREATE TABLE IF NOT EXISTS "users" (
@@ -91,18 +91,18 @@ CREATE TABLE IF NOT EXISTS profile_likes (
 `;
 
 export const createUserSchema = async () => {
-    const client = await pool.connect();
-    try {
-        await pool.query(createUserTable);
-        await pool.query(createVerificationTokensTable);
-        await pool.query(createResetPasswordTokensTable);
-        await pool.query(createSessionsTable);
-        await pool.query(profileTable);
-        await pool.query(profileImagesTable);
-        await pool.query(profileViewsTable);
-        await pool.query(profileLikesTable);
-        console.log('users table created');
-    } catch (error) {
-        console.log(error);
-    }
+  const client = await pool.connect();
+  try {
+    await pool.query(createUserTable);
+    await pool.query(createVerificationTokensTable);
+    await pool.query(createResetPasswordTokensTable);
+    await pool.query(createSessionsTable);
+    await pool.query(profileTable);
+    await pool.query(profileImagesTable);
+    await pool.query(profileViewsTable);
+    await pool.query(profileLikesTable);
+    console.log("users table created");
+  } catch (error) {
+    console.log(error);
+  }
 };
