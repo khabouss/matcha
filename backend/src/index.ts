@@ -1,6 +1,7 @@
 import {
   CreateBucketCommand,
   HeadBucketCommand,
+  PutBucketCorsCommand,
   S3Client,
 } from "@aws-sdk/client-s3";
 import app from "./app";
@@ -33,6 +34,7 @@ const createBucket = async () => {
     // Check if the bucket already exists
     await s3Client.send(new HeadBucketCommand({ Bucket: bucketName }));
     console.log(`Bucket "${bucketName}" already exists.`);
+    await setBucketCors(bucketName);
   } catch (error: any) {
     if (error.name === "NotFound") {
       // If the bucket doesn't exist, create it
@@ -41,6 +43,29 @@ const createBucket = async () => {
     } else {
       console.error(error);
     }
+  }
+};
+const setBucketCors = async (bucketName: string) => {
+  const corsParams = {
+    Bucket: bucketName,
+    CORSConfiguration: {
+      CORSRules: [
+        {
+          AllowedHeaders: ["*"],
+          AllowedMethods: ["PUT", "GET", "POST", "HEAD", "DELETE"],
+          AllowedOrigins: ["*"],
+          ExposeHeaders: ["ETag"],
+          MaxAgeSeconds: 3000,
+        },
+      ],
+    },
+  };
+
+  try {
+    await s3Client.send(new PutBucketCorsCommand(corsParams));
+    console.log("CORS configuration applied successfully.");
+  } catch (error) {
+    console.error("Error setting CORS configuration:", error);
   }
 };
 

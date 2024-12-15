@@ -25,7 +25,7 @@ class GeneratePreSignedUrls {
     });
 
     return url.replace("localstack", "localhost").split("?")[0];
-
+    // return url;
   }
 }
 
