@@ -77,18 +77,43 @@ const user = ref({
 });
 
 const newInterest = ref('');
-const gridImages = ref(Array(5).fill(null)); // Array to hold image file URLs
-const uploadedImages = ref(Array(5).fill(null)); // Array to hold image file objects
+const gridImages = ref(Array(5).fill(null));
+const uploadedImages = ref(Array(5).fill(null));
+const presignedUrls = ref(Array(5).fill(null));
 
-const uploadImage = (index) => {
+const uploadImage = async (index) => {
   const input = document.createElement('input');
   input.type = 'file';
   input.accept = 'image/*';
-  input.onchange = (event) => {
+
+  input.onchange = async (event) => {
     const file = event.target.files[0];
     if (file) {
-      uploadedImages.value[index] = file;
-      gridImages.value[index] = URL.createObjectURL(file);
+      try {
+        const { data, error } = await useCFetch('http://localhost:3001/upload/s3/presigned-url', {
+          method: 'POST',
+        });
+
+        if (data.value?.fileUrl && !error.value) {
+          presignedUrls.value[index] = data.value?.fileUrl; // Store presigned URL
+
+          const { error: uploadError } = await useCFetch(data.value?.fileUrl, {
+            method: 'PUT',
+            body: file,
+          });
+
+          if (!uploadError.value) {
+            uploadedImages.value[index] = file;
+            gridImages.value[index] = URL.createObjectURL(file);
+          } else {
+            console.error('Error uploading image to presigned URL', uploadError.value);
+          }
+        } else {
+          console.error('Error fetching presigned URL', error.value);
+        }
+      } catch (err) {
+        console.error('Error during image upload', err);
+      }
     }
   };
   input.click();
@@ -102,36 +127,31 @@ const addInterest = () => {
 };
 
 const updateProfile = async () => {
-  const formData = new FormData();
-
-  // Add stringified JSON data
   const profileData = {
     gender: user.value.gender,
     sexual_preferences: user.value.sexual_preferences,
     biography: user.value.biography,
-    fame_rating: 4.5, // Default fame rating
-    gps_location: {
-      lat: 34.0522,
-      lng: -118.2437,
-    },
-    neighborhood: 'casa LA',
-    allow_gps: true, // Example value
     interests: user.value.interests,
+    images: presignedUrls.value.filter((url) => url !== null),
   };
 
-  formData.append('profile', JSON.stringify(profileData));
-
-  formData.append(`files`, uploadedImages.value);
-
   try {
-    const {data, error} = await useCFetch('http://localhost:3001/profile', { method: 'POST', body: profileData });
-    console.log(data?.value);
-    console.log(error?.value);
-  } catch (error) {
-    console.error(error);
+    const { data, error } = await useCFetch('http://localhost:3001/profile', {
+      method: 'POST',
+      body: profileData,
+    });
+
+    if (error.value) {
+      console.error('Error updating profile', error.value);
+    } else {
+      console.log('Profile updated successfully', data.value);
+    }
+  } catch (err) {
+    console.error('Error during profile update', err);
   }
 };
 </script>
+
 
 
 
