@@ -3,7 +3,6 @@
     <header class="header">
       <h1>Please complete your profile to continue</h1>
     </header>
-
     <section class="image-grid">
       <h2>Add Pictures</h2>
       <div class="grid">
@@ -119,12 +118,13 @@ const updateProfile = async () => {
     allow_gps: true, // Example value
     interests: user.value.interests,
   };
-  console.log(JSON.stringify(profileData));
+
   formData.append('profile', JSON.stringify(profileData));
-  console.log(uploadedImages.value);
+
   formData.append(`files`, uploadedImages.value);
+
   try {
-    const {data, error} = await useCFetch('http://localhost:3001/profile', { method: 'POST', body: formData });
+    const {data, error} = await useCFetch('http://localhost:3001/profile', { method: 'POST', body: profileData });
     console.log(data?.value);
     console.log(error?.value);
   } catch (error) {
