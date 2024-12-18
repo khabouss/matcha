@@ -40,6 +40,7 @@ const createBucket = async () => {
       // If the bucket doesn't exist, create it
       await s3Client.send(new CreateBucketCommand({ Bucket: bucketName }));
       console.log(`Bucket "${bucketName}" created.`);
+      await setBucketCors(bucketName);
     } else {
       console.error(error);
     }
