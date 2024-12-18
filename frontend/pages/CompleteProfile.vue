@@ -6,12 +6,7 @@
     <section class="image-grid">
       <h2>Add Pictures</h2>
       <div class="grid">
-        <div
-          class="grid-item"
-          v-for="(image, index) in gridImages"
-          :key="index"
-          @click="uploadImage(index)"
-        >
+        <div class="grid-item" v-for="(image, index) in gridImages" :key="index" @click="uploadImage(index)">
           <img v-if="image" :src="image" alt="Image Upload" />
           <div v-else class="placeholder">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" class="svg-placeholder">
@@ -132,8 +127,13 @@ const updateProfile = async () => {
     sexual_preferences: user.value.sexual_preferences,
     biography: user.value.biography,
     interests: user.value.interests,
-    images: presignedUrls.value.filter((url) => url !== null),
-  };
+    images: presignedUrls.value
+      .filter((url) => url !== null) // Filter out null URLs
+      .map((url) => {
+        const slashIndex = url.indexOf('/', 8);
+        return slashIndex !== -1 ? url.slice(slashIndex + 1) : ''; // Extract part after the slash
+      })
+  }
 
   try {
     const { data, error } = await useCFetch('http://localhost:3001/profile', {
@@ -142,9 +142,11 @@ const updateProfile = async () => {
     });
 
     if (error.value) {
-      console.error('Error updating profile', error.value);
+      alert('Error updating profile', error.value);
     } else {
       console.log('Profile updated successfully', data.value);
+      const router = useRouter();
+      router.push('/');
     }
   } catch (err) {
     console.error('Error during profile update', err);
