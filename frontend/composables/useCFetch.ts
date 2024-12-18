@@ -22,7 +22,7 @@ export async function useCFetch(url: string, options: any = {}): Promise<{data: 
       return (data.value as any).accessToken;
     } catch (error) {
       console.error("Failed to refresh token:", error);
-      await router.push("/signin");
+      window.location.href = '/signin';
     }
   }
 
@@ -49,7 +49,7 @@ export async function useCFetch(url: string, options: any = {}): Promise<{data: 
     }
 
     if (error.value.statusCode === 422) {
-      router.push('/completeprofile');
+      window.location.href = '/completeprofile';
     }
 
   }

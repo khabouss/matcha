@@ -145,8 +145,7 @@ const updateProfile = async () => {
       alert('Error updating profile', error.value);
     } else {
       console.log('Profile updated successfully', data.value);
-      const router = useRouter();
-      router.push('/');
+      window.location.href = '/'
     }
   } catch (err) {
     console.error('Error during profile update', err);

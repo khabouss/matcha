@@ -1,5 +1,6 @@
 <template>
     <nuxt-page />
+    <notification />
 </template>
 
 <style>
