@@ -43,7 +43,7 @@ const chats = ref([
 ])
 
 const goToChat = (chatId: string) => {
-  router.push(`/chats/${chatId}`)
+  window.location.href = `/chats/${chatId}`
 }
 </script>
 

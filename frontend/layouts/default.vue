@@ -1,5 +1,4 @@
 <template>
-
     <head>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     </head>
@@ -34,6 +33,10 @@
             <hr style="width: 1px; height: 20px; display: inline-block;">
             <button @click="goToPage('chat')" class="nav-btn">
                 <i class="fas fa-envelope"></i><span> Chat</span>
+            </button>
+            <hr style="width: 1px; height: 20px; display: inline-block;">
+            <button @click="goToPage('notifications')" class="nav-btn">
+                <i class="fas fa-bell"></i><span> Notifications</span>
             </button>
         </nav>
 
