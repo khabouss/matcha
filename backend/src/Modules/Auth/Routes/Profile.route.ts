@@ -7,10 +7,12 @@ import whoViewedProfile from "../Controllers/profiles/WhoViewedProfile";
 import swipeList from "../Controllers/profiles/SwipeList";
 import multer from "multer";
 import myProfileDetails from "../Controllers/profiles/MyProfileDetails";
+import updateProfile from "../Controllers/profiles/UpdateProfile";
 
 const attachProfileRoute = (router: Router) => {
   router.post("/", authMiddleware, createProfileController);
   router.get("/me", authMiddleware, myProfile);
+  router.patch("/me", authMiddleware, updateProfile);
   router.get("/swipe-list", authMiddleware, swipeList);
   router.get("/me/viewers", authMiddleware, whoViewedProfile);
   router.get("/:profileUserName", authMiddleware, GetProfileUsers);

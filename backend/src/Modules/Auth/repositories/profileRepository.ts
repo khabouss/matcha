@@ -28,12 +28,12 @@ class profileRepository {
             SELECT * FROM profiles
             WHERE user_id = $1
         `;
-//     const query = `
-//     SELECT p.*, i.*
-//     FROM profiles p
-//     LEFT JOIN profile_images i ON p.id = i.profile_id
-//     WHERE p.user_id = $1
-// `;
+    //     const query = `
+    //     SELECT p.*, i.*
+    //     FROM profiles p
+    //     LEFT JOIN profile_images i ON p.id = i.profile_id
+    //     WHERE p.user_id = $1
+    // `;
     const values = [user_id];
     const row = await pool.query(query, values);
     return row.rows[0];
@@ -111,6 +111,28 @@ class profileRepository {
     const values = [profile_id];
     const row = await pool.query(query, values);
     return row.rows;
+  }
+  static async updateProfile(profile: any) {
+    const profileQuery = `
+            UPDATE profiles
+            SET gender = $1, sexual_preferences = $2, biography = $3, fame_rating = $4, 
+                gps_location = POINT($5, $6), neighborhood = $7, allow_gps = $8
+            WHERE user_id = $9
+            RETURNING *;
+        `;
+    const profileValues = [
+      profile.gender,
+      profile.sexual_preferences,
+      profile.biography,
+      profile.fame_rating || 0.0,
+      profile.gps_location?.lat || null,
+      profile.gps_location?.lng || null,
+      profile.neighborhood || null,
+      profile.allow_gps ?? true,
+      profile.user_id,
+    ];
+    const profileRow = await pool.query(profileQuery, profileValues);
+    return profileRow.rows[0];
   }
 }
 

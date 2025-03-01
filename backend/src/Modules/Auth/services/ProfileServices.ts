@@ -45,7 +45,7 @@ class ProfileServices {
       throw new MatchaError("Profile not found", 404);
     }
     const userinfo = await UserRepository.findById(findProfile.user_id);
-    const { isverified, created_At, password, ...user } = userinfo;
+    const { id, isverified, password, created_At, ...user } = userinfo;
     findProfile.userinfo = user;
     const getimagesUser = await profileRepository.getProfileImages(
       findProfile.id
@@ -102,6 +102,19 @@ class ProfileServices {
     returndata.images = images;
 
     return returndata;
+  }
+  static async updateProfile(profile: any) {
+    const findProfile = await profileRepository.findProfileByUserId(
+      profile.user_id
+    );
+    if (!findProfile) {
+      throw new MatchaError("Profile not found", 404);
+    }
+    const updateProfile = await profileRepository.updateProfile(profile);
+    if (!updateProfile) {
+      throw new MatchaError("Profile not updated", 400);
+    }
+    return updateProfile;
   }
 }
 
