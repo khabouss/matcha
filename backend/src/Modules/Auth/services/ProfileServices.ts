@@ -44,6 +44,9 @@ class ProfileServices {
     if (!findProfile) {
       throw new MatchaError("Profile not found", 404);
     }
+    const userinfo = await UserRepository.findById(findProfile.user_id);
+    const { isverified, created_At, password, ...user } = userinfo;
+    findProfile.userinfo = user;
     const getimagesUser = await profileRepository.getProfileImages(
       findProfile.id
     );
