@@ -44,6 +44,7 @@ const createProfileController = async (
       gps_location,
       neighborhood,
       allow_gps,
+      images,
     };
     const profile = await ProfileServices.createProfile(dataProfile);
     console.log("profile: ", profile);
