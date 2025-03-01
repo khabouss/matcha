@@ -11,12 +11,18 @@ const myProfile = async (req: Request, res: Response, next: NextFunction) => {
       return;
     }
     const getProfile = await ProfileServices.getMyProfile(req.user.id);
+    const verfiyProfileOwner = await ProfileServices.verfiyProfileOwner(
+      Number(getProfile.id),
+      req.user.id
+    );
+    const viewsArray = Object.values(verfiyProfileOwner);
     res.status(200).json({
       status: "success",
       data: {
         message: "Profile fetched successfully!",
         data: {
           getProfile,
+          viewsArray,
         },
       },
     });
