@@ -2,13 +2,7 @@ import { defineStore } from "pinia";
 
 export const useNotificationStore = defineStore("notification", {
   state: () => ({
-    notifications: [
-      {
-        id: Date.now(),
-        message: "hellooooo",
-        url: '/'
-      },
-    ],
+    notifications: [],
   }),
   actions: {
     addNotification(message) {
