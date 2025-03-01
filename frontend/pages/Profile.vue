@@ -74,7 +74,7 @@
             </div>
           </div>
 
-          <button type="submit" class="btn-update">Update Profile</button>
+          <button type="submit" class="btn-update" @click="updateProfile">Update Profile</button>
         </form>
       </section>
 
@@ -100,20 +100,38 @@
 <script setup>
 import { ref } from 'vue';
 
+const { data, error } = await useCFetch('http://localhost:3001/profile/me', {
+  method: 'GET',
+});
+
+const presignedUrls = ref(Array(5).fill(null));
+
+console.log(data.value.data.data.getProfile);
+
 const user = ref({
-  firstName: 'Taha',
-  lastName: '',
-  email: '',
-  gender: 'male',
-  sexualPreferences: 'heterosexual',
-  biography: '',
+  firstName: data.value.data.data.getProfile.userinfo.first_name,
+  lastName: data.value.data.data.getProfile.userinfo.last_name,
+  email: data.value.data.data.getProfile.userinfo.email,
+  gender: data.value.data.data.getProfile.gender,
+  sexualPreferences: data.value.data.data.getProfile.sexual_preferences,
+  biography: data.value.data.data.getProfile.biography,
   interests: [],
 });
 
 const newInterest = ref('');
 const likes = ref([]); // Array of users who liked the profile
 const fameRating = ref(0); // Fame rating calculation logic goes here
-const gridImages = ref([null, null, null, null, null]); // Holds image uploads for grid
+
+const images = data.value.data.data.getProfile.images.map(
+  path => `http://localhost:4566/${path}`
+);
+
+// Ensure the array has exactly 5 elements
+while (images.length < 5) {
+  images.push(null);
+}
+
+const gridImages = ref(images); // Holds image uploads for grid
 
 // Mocked data for profiles who viewed the profile
 const viewedProfiles = ref([
@@ -122,8 +140,35 @@ const viewedProfiles = ref([
   { id: 3, name: 'Charlie', gender: 'Non-binary', image: 'https://via.placeholder.com/50' },
 ]);
 
-const updateProfile = () => {
-  console.log('Profile updated:', user.value);
+const updateProfile = async () => {
+  const profileData = {
+    gender: user.value.gender,
+    sexual_preferences: user.value.sexual_preferences,
+    biography: user.value.biography,
+    interests: user.value.interests,
+    images: presignedUrls.value
+      .filter((url) => url !== null) // Filter out null URLs
+      .map((url) => {
+        const slashIndex = url.indexOf('/', 8);
+        return slashIndex !== -1 ? url.slice(slashIndex + 1) : ''; // Extract part after the slash
+      })
+  }
+
+  try {
+    const { data, error } = await useCFetch('http://localhost:3001/profile', {
+      method: 'POST',
+      body: profileData,
+    });
+
+    if (error.value) {
+      alert('Error updating profile', error.value);
+    } else {
+      console.log('Profile updated successfully', data.value);
+      window.location.href = '/profile'
+    }
+  } catch (err) {
+    console.error('Error during profile update', err);
+  }
 };
 
 const addInterest = () => {
@@ -137,13 +182,36 @@ const uploadImage = (index) => {
   const input = document.createElement('input');
   input.type = 'file';
   input.accept = 'image/*';
-  input.onchange = (event) => {
+
+  input.onchange = async (event) => {
     const file = event.target.files[0];
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      gridImages.value[index] = e.target.result;
-    };
-    reader.readAsDataURL(file);
+    if (file) {
+      try {
+        const { data, error } = await useCFetch('http://localhost:3001/upload/s3/presigned-url', {
+          method: 'POST',
+        });
+
+        if (data.value?.fileUrl && !error.value) {
+          presignedUrls.value[index] = data.value?.fileUrl; // Store presigned URL
+
+          const { error: uploadError } = await useCFetch(data.value?.fileUrl, {
+            method: 'PUT',
+            body: file,
+          });
+
+          if (!uploadError.value) {
+            uploadedImages.value[index] = file;
+            gridImages.value[index] = URL.createObjectURL(file);
+          } else {
+            console.error('Error uploading image to presigned URL', uploadError.value);
+          }
+        } else {
+          console.error('Error fetching presigned URL', error.value);
+        }
+      } catch (err) {
+        console.error('Error during image upload', err);
+      }
+    }
   };
   input.click();
 };
