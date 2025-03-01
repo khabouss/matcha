@@ -45,10 +45,22 @@ const createSessionsTable = `
     )
 `;
 
-
+//     CREATE TABLE IF NOT EXISTS profiles (
+//     id SERIAL PRIMARY KEY,
+//     user_id INT NOT NULL UNIQUE,
+//     gender VARCHAR(10),
+//     sexual_preferences VARCHAR(50),
+//     biography TEXT,
+//     fame_rating DECIMAL(3, 2) DEFAULT 0.00,  -- Fame rating from 0.00 to 100.00
+//     gps_location POINT,  -- Stores latitude and longitude
+//     neighborhood VARCHAR(100),
+//     allow_gps BOOLEAN DEFAULT TRUE,  -- Flag if user allows GPS tracking,
+//     profile_images TEXT[5] DEFAULT ARRAY[]::TEXT[],  -- Array of profile image URLs
+//     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+// )
 
 const profileTable = `
-    CREATE TABLE IF NOT EXISTS profiles (
+CREATE TABLE IF NOT EXISTS profiles (
     id SERIAL PRIMARY KEY,
     user_id INT NOT NULL UNIQUE,
     gender VARCHAR(10),
@@ -57,19 +69,26 @@ const profileTable = `
     fame_rating DECIMAL(3, 2) DEFAULT 0.00,  -- Fame rating from 0.00 to 100.00
     gps_location POINT,  -- Stores latitude and longitude
     neighborhood VARCHAR(100),
-    allow_gps BOOLEAN DEFAULT TRUE,  -- Flag if user allows GPS tracking,
-    profile_images TEXT[5] DEFAULT ARRAY[]::TEXT[],  -- Array of profile image URLs
+    allow_gps BOOLEAN DEFAULT TRUE,  -- Flag if user allows GPS tracking
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-)
+);
 `;
+
+// CREATE TABLE IF NOT EXISTS profile_images (
+//     id SERIAL PRIMARY KEY,
+//     profile_id INT NOT NULL,
+//     image_url TEXT NOT NULL,
+//     FOREIGN KEY (profile_id) REFERENCES profiles(id) ON DELETE CASCADE
+
+// )
 const profileImagesTable = `
 CREATE TABLE IF NOT EXISTS profile_images (
     id SERIAL PRIMARY KEY,
     profile_id INT NOT NULL,
     image_url TEXT NOT NULL,
     FOREIGN KEY (profile_id) REFERENCES profiles(id) ON DELETE CASCADE
-    
-)
+);
+
 `;
 const profileViewsTable = `
 CREATE TABLE IF NOT EXISTS profile_views (

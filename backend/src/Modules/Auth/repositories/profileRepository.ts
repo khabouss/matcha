@@ -28,6 +28,12 @@ class profileRepository {
             SELECT * FROM profiles
             WHERE user_id = $1
         `;
+//     const query = `
+//     SELECT p.*, i.*
+//     FROM profiles p
+//     LEFT JOIN profile_images i ON p.id = i.profile_id
+//     WHERE p.user_id = $1
+// `;
     const values = [user_id];
     const row = await pool.query(query, values);
     return row.rows[0];

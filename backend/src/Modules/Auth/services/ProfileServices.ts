@@ -44,6 +44,11 @@ class ProfileServices {
     if (!findProfile) {
       throw new MatchaError("Profile not found", 404);
     }
+    const getimagesUser = await profileRepository.getProfileImages(
+      findProfile.id
+    );
+    const images = getimagesUser.map((image: any) => image.image_url);
+    findProfile.images = images;
     return findProfile;
   }
   static async getProfileUsers(profileId: string) {
