@@ -12,7 +12,7 @@ const profile = ref({});
 const route = useRoute();
 const notFound = ref(false);
 
-const {data, error} = await useCFetch(`http://backend:3001/profile/${route.params.username}`, { method: 'GET' });
+const {data, error} = await useCFetch(`http://localhost:3001/profile/${route.params.username}`, { method: 'GET' });
 
 if (data.value?.status === 'success') {
   profile.value = data?.value?.data.profile;
