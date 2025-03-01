@@ -134,6 +134,15 @@ class profileRepository {
     const profileRow = await pool.query(profileQuery, profileValues);
     return profileRow.rows[0];
   }
+  static async deleteProfileImages(profile_id: number) {
+    const query = `
+            DELETE FROM profile_images
+            WHERE profile_id = $1
+        `;
+    const values = [profile_id];
+    const row = await pool.query(query, values);
+    return row.rows;
+  }
 }
 
 export default profileRepository;

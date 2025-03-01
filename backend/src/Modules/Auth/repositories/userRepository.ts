@@ -26,6 +26,22 @@ export class UserRepository {
     const { rows } = await pool.query(query, values);
     return rows[0];
   }
+  static async UpdateUser(
+    id: number,
+    firstName: string,
+    lastName: string,
+    email: string
+  ): Promise<User> {
+    const query = `
+            UPDATE users
+            SET first_name = $1, last_name = $2, email = $3
+            WHERE id = $4
+            RETURNING *
+        `;
+    const values = [firstName, lastName, email, id];
+    const { rows } = await pool.query(query, values);
+    return rows[0];
+  }
 
   static async findById(id: number): Promise<User> {
     const query = "SELECT * FROM users WHERE id = $1";

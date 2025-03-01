@@ -16,6 +16,9 @@ const updateProfile = async (
       return;
     }
     const {
+      first_name,
+      last_name,
+      email,
       gender,
       sexual_preferences,
       biography,
@@ -28,6 +31,9 @@ const updateProfile = async (
 
     const dataProfile = {
       user_id: req.user.id,
+      firstName: first_name,
+      lastName: last_name,
+      email,
       gender,
       sexual_preferences,
       biography,

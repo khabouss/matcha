@@ -114,6 +114,39 @@ class ProfileServices {
     if (!updateProfile) {
       throw new MatchaError("Profile not updated", 400);
     }
+    console.log("profile: ", profile);
+
+    // if (profile.fileName || profile.lastName || profile.email) {
+    const updateUser = await UserRepository.UpdateUser(
+      profile.user_id,
+      profile.firstName,
+      profile.lastName,
+      profile.email
+    );
+    if (!updateUser) {
+      throw new MatchaError("User not updated", 400);
+    }
+    if (profile.images.length !== 0) {
+      const deleteImages = await profileRepository.deleteProfileImages(
+        findProfile.id
+      );
+      if (!deleteImages) {
+        throw new MatchaError("Images not deleted", 400);
+      }
+      for (let i = 0; i < profile.images.length; i++) {
+        if (!profile.images[i]) {
+          throw new MatchaError("Image url is required", 400);
+        }
+        const image = {
+          profile_id: findProfile.id,
+          image_url: profile.images[i],
+        };
+        const createImage = await profileRepository.putProfileImages(
+          image.profile_id,
+          image.image_url
+        );
+      }
+    }
     return updateProfile;
   }
 }
