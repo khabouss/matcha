@@ -32,7 +32,7 @@ const swipeData = reactive({
   dragging: false,
 });
 
-const {data, error} = await useCFetch('http://backend:3001/profile/swipe-list', { method: 'GET' });
+const {data, error} = await useCFetch('http://localhost:3001/profile/swipe-list', { method: 'GET' });
 if (data.value?.status === 'success') {
   profiles.value = data?.value?.data?.swipeList;
 }
