@@ -3,7 +3,7 @@
 
     <div class="profile-page">
       <header class="header">
-        <h1>{{ user.firstName }}'s Profile</h1>
+        <h1>{{ user.first_name }}'s Profile</h1>
       </header>
 
       <section class="image-grid">
@@ -27,13 +27,13 @@
       <section class="profile-info">
         <form @submit.prevent="updateProfile" class="profile-form">
           <div class="form-group">
-            <label for="firstName">First Name:</label>
-            <input v-model="user.firstName" type="text" id="firstName" required />
+            <label for="first_name">First Name:</label>
+            <input v-model="user.first_name" type="text" id="first_name" required />
           </div>
 
           <div class="form-group">
-            <label for="lastName">Last Name:</label>
-            <input v-model="user.lastName" type="text" id="lastName" required />
+            <label for="last_name">Last Name:</label>
+            <input v-model="user.last_name" type="text" id="last_name" required />
           </div>
 
           <div class="form-group">
@@ -51,8 +51,8 @@
           </div>
 
           <div class="form-group">
-            <label for="sexualPreferences">Sexual Preferences:</label>
-            <select v-model="user.sexualPreferences" id="sexualPreferences" required>
+            <label for="sexual_preferences">Sexual Preferences:</label>
+            <select v-model="user.sexual_preferences" id="sexual_preferences" required>
               <option value="heterosexual">Heterosexual</option>
               <option value="homosexual">Homosexual</option>
               <option value="bisexual">Bisexual</option>
@@ -109,11 +109,11 @@ const presignedUrls = ref(Array(5).fill(null));
 console.log(data.value.data.data.getProfile);
 
 const user = ref({
-  firstName: data.value.data.data.getProfile.userinfo.first_name,
-  lastName: data.value.data.data.getProfile.userinfo.last_name,
+  first_name: data.value.data.data.getProfile.userinfo.first_name,
+  last_name: data.value.data.data.getProfile.userinfo.last_name,
   email: data.value.data.data.getProfile.userinfo.email,
   gender: data.value.data.data.getProfile.gender,
-  sexualPreferences: data.value.data.data.getProfile.sexual_preferences,
+  sexual_preferences: data.value.data.data.getProfile.sexual_preferences,
   biography: data.value.data.data.getProfile.biography,
   interests: [],
 });
@@ -131,6 +131,7 @@ while (images.length < 5) {
   images.push(null);
 }
 
+const uploadedImages = ref(Array(5).fill(null));
 const gridImages = ref(images); // Holds image uploads for grid
 
 // Mocked data for profiles who viewed the profile
@@ -142,6 +143,7 @@ const viewedProfiles = ref([
 
 const updateProfile = async () => {
   const profileData = {
+    ...user.value,
     gender: user.value.gender,
     sexual_preferences: user.value.sexual_preferences,
     biography: user.value.biography,
@@ -155,8 +157,8 @@ const updateProfile = async () => {
   }
 
   try {
-    const { data, error } = await useCFetch('http://localhost:3001/profile', {
-      method: 'POST',
+    const { data, error } = await useCFetch('http://localhost:3001/profile/me', {
+      method: 'PATCH',
       body: profileData,
     });
 
