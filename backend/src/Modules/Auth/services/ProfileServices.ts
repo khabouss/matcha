@@ -94,7 +94,25 @@ class ProfileServices {
           viewerProfile.id
         );
         const profileImage = viewerImages[0].image_url;
-        return { ...user, profileImage };
+        //get gender only from profile
+        const findProfile = await profileRepository.findProfileByUserId(
+          viewerProfile.id
+        );
+        console.log("findProfile >>>>>>: ", findProfile);
+        const {
+          id: _,
+          user_id,
+          gps_location,
+          allow_gps,
+          fame_rating,
+          sexual_preferences,
+          biography,
+          neighborhood,
+          ...returndata
+        } = findProfile;
+        //
+
+        return { ...user, profileImage, ...returndata };
       })
     );
     console.log("profileViewersimages: ", profileViewersimages);
