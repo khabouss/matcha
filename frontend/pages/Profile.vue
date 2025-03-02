@@ -84,10 +84,10 @@
         <p><strong>Fame Rating:</strong> {{ fameRating }}</p>
         <h3>Profiles Who Viewed This Profile</h3>
         <div class="viewed-profiles">
-          <div class="profile-item" v-for="profile in viewedProfiles" :key="profile.id" @click="viewProfile(profile)">
-            <img :src="profile.image" alt="Profile Picture" class="profile-image" />
+          <div class="profile-item" v-for="profile in viewedProfiles" :key="profile.username" @click="viewProfile(profile)">
+            <img :src="profile.profileImage" alt="Profile Picture" class="profile-image" />
             <div style="display: flex; flex-direction: column;">
-              <h4>{{ profile.name }}</h4>
+              <h4>{{ `${profile.first_name} ${profile.last_name}` }}</h4>
               <span style="font-size: small;">{{ profile.gender }}</span>
             </div>
           </div>
@@ -135,11 +135,7 @@ const uploadedImages = ref(Array(5).fill(null));
 const gridImages = ref(images); // Holds image uploads for grid
 
 // Mocked data for profiles who viewed the profile
-const viewedProfiles = ref([
-  { id: 1, name: 'Alice', gender: 'Female', image: 'https://via.placeholder.com/50' },
-  { id: 2, name: 'Bob', gender: 'Male', image: 'https://via.placeholder.com/50' },
-  { id: 3, name: 'Charlie', gender: 'Non-binary', image: 'https://via.placeholder.com/50' },
-]);
+const viewedProfiles = ref(data.value.data.data.views);
 
 const updateProfile = async () => {
   const profileData = {
@@ -219,7 +215,7 @@ const uploadImage = (index) => {
 };
 
 const viewProfile = (profile) => {
-  console.log('View profile clicked:', profile);
+  useRoute().push('/'+profile)
   // Here you can implement navigation to the profile details page
 };
 </script>
