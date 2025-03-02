@@ -22,7 +22,7 @@ const myProfile = async (req: Request, res: Response, next: NextFunction) => {
         message: "Profile fetched successfully!",
         data: {
           getProfile,
-          viewsArray,
+          views: viewsArray,
         },
       },
     });

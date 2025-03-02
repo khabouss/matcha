@@ -84,7 +84,21 @@ class ProfileServices {
       throw new MatchaError("You can only view your own profile viewers", 403);
     }
     const profile_views = await profileRepository.getProfileViews(profileId);
-    return profile_views;
+    console.log("profile_views: ", profile_views);
+    const profileViewersimages = await Promise.all(
+      profile_views.map(async (viewer: any) => {
+        const viewerProfile = await UserRepository.findById(viewer.id);
+        const { password, created_At, isverified, id, email, ...user } =
+          viewerProfile;
+        const viewerImages = await profileRepository.getProfileImages(
+          viewerProfile.id
+        );
+        const profileImage = viewerImages[0].image_url;
+        return { ...user, profileImage };
+      })
+    );
+    console.log("profileViewersimages: ", profileViewersimages);
+    return profileViewersimages;
   }
   static async getMyProfileDetails(userId: number) {
     const findProfile = await profileRepository.findProfileByUserId(userId);
