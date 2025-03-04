@@ -143,6 +143,15 @@ class profileRepository {
     const row = await pool.query(query, values);
     return row.rows;
   }
+  static async getSwipeList(user_id: number) {
+    const query = `
+            SELECT * FROM profiles
+            WHERE user_id != $1
+        `;
+    const values = [user_id];
+    const row = await pool.query(query, values);
+    return row.rows;
+  }
 }
 
 export default profileRepository;

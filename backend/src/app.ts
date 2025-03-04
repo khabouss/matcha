@@ -8,6 +8,7 @@ import { s3Client } from "./index";
 import multer from "multer";
 import { exceptionHandler } from "./middleware/exceptionHandler";
 import attachUplaodRoute from "./Modules/Auth/Routes/Uplaod.route";
+import seedDatabase from "./db/addDataToDatabase";
 
 const bucketName = "test-bucket";
 
@@ -18,9 +19,7 @@ const upload = multer({ storage: storage });
 const app = express();
 app.use(express.json());
 
-app.use(cors(
-  {origin: "*"}
-))
+app.use(cors({ origin: "*" }));
 
 app.get("/", (req, res) => {
   res.send("Hello, TypeScript with Express!");
@@ -67,10 +66,15 @@ attachAuthRoute(authRouter);
 attachProfileRoute(profileRouter);
 /** UPLOAD */
 attachUplaodRoute(uplaodRouter);
+// seedDatabase();
+
 
 app.use("/auth", authRouter);
 app.use("/profile", profileRouter);
 app.use("/upload", uplaodRouter);
+
+
+// write script that can insert data into the database
 
 app.use(exceptionHandler);
 
