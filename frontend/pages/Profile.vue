@@ -85,7 +85,7 @@
         <h3>Profiles Who Viewed This Profile</h3>
         <div class="viewed-profiles">
           <div class="profile-item" v-for="profile in viewedProfiles" :key="profile.username" @click="viewProfile(profile)">
-            <img :src="profile.profileImage" alt="Profile Picture" class="profile-image" />
+            <img :src="'http://localhost:3001/'+profile.profileImage" alt="Profile Picture" class="profile-image" />
             <div style="display: flex; flex-direction: column;">
               <h4>{{ `${profile.first_name} ${profile.last_name}` }}</h4>
               <span style="font-size: small;">{{ profile.gender }}</span>
