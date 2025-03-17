@@ -1,28 +1,26 @@
 <template>
   <NuxtLayout>
     <div class="swipe-container">
-      <div class="profile-card" v-for="(profile, index) in profiles" :key="index" :style="{
-        zIndex: profiles.length - index,
-        transform: `translateX(${profile.offsetX}px) rotate(${profile.rotate}deg)`,
-        opacity: profile.opacity
-      }" @mousedown="startSwipe($event, profile, index)" @touchstart="startSwipe($event, profile, index)">
+      <div
+        class="profile-card"
+        v-for="(profile, index) in profiles"
+        :key="index"
+        :style="{
+          zIndex: profiles.length - index,
+          transform: `translateX(${profile.offsetX}px) rotate(${profile.rotate}deg)`,
+          opacity: profile.opacity
+        }"
+        @mousedown="startSwipe($event, profile, index)"
+        @touchstart="startSwipe($event, profile, index)"
+      >
         <profile-card :profile="profile" />
-      </div>
-      <!-- Swipe Buttons (inside container) -->
-      <div class="swipe-buttons" v-if="false">
-        <button class="swipe-btn dislike-btn" @click="manualSwipe('dislike')">
-          <i class="fas fa-times"></i>
-        </button>
-        <button class="swipe-btn like-btn" @click="manualSwipe('like')">
-          <i class="fas fa-heart"></i>
-        </button>
       </div>
     </div>
   </NuxtLayout>
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue';
+import { ref, reactive } from "vue";
 
 const profiles = ref([]);
 const currentIndex = ref(0);
@@ -32,17 +30,76 @@ const swipeData = reactive({
   dragging: false,
 });
 
-const {data, error} = await useCFetch('http://localhost:3001/profile/swipe-list', { method: 'GET' });
-if (data.value?.status === 'success') {
-  profiles.value = data?.value?.data?.swipeList;
-}
+// Function to get user location
+const getUserLocation = async () => {
+  try {
+    const permission = await navigator.permissions.query({ name: "geolocation" });
+
+    if (permission.state === "granted") {
+      console.log("Permission granted ✅");
+      return new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            resolve({
+              lat: position.coords.latitude,
+              lon: position.coords.longitude
+            });
+          },
+          (error) => {
+            console.error("Geolocation error:", error);
+            reject({ lat: null, lon: null });
+          }
+        );
+      });
+    } else if (permission.state === "prompt") {
+      console.log("Requesting permission ⚠️");
+      return new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            resolve({
+              lat: position.coords.latitude,
+              lon: position.coords.longitude
+            });
+          },
+          (error) => {
+            console.error("Geolocation error:", error);
+            reject({ lat: null, lon: null });
+          }
+        );
+      });
+    } else {
+      console.log("Permission denied ❌");
+      return { lat: null, lon: null };
+    }
+  } catch (error) {
+    console.error("Permission check error:", error);
+    return { lat: null, lon: null };
+  }
+};
+
+// Fetch profiles and send location
+const fetchProfiles = async () => {
+  const location = await getUserLocation();
+
+  const { data, error } = await useCFetch("http://localhost:3001/profile/swipe-list", {
+    method: "GET",
+    params: { latitude: location.lat, longitude: location.lon }
+  });
+
+  if (data.value?.status === "success") {
+    profiles.value = data?.value?.data?.swipeData;
+  }
+};
+
+// Fetch profiles on load
+fetchProfiles();
 
 const startSwipe = (event, profile, index) => {
-  swipeData.startX = event.type === 'mousedown' ? event.clientX : event.touches[0].clientX;
+  swipeData.startX = event.type === "mousedown" ? event.clientX : event.touches[0].clientX;
   swipeData.dragging = true;
 
   const moveHandler = (moveEvent) => {
-    swipeData.currentX = moveEvent.type === 'mousemove' ? moveEvent.clientX : moveEvent.touches[0].clientX;
+    swipeData.currentX = moveEvent.type === "mousemove" ? moveEvent.clientX : moveEvent.touches[0].clientX;
     const deltaX = swipeData.currentX - swipeData.startX;
     profiles.value[index].offsetX = deltaX;
     profiles.value[index].rotate = deltaX / 10;
@@ -53,37 +110,37 @@ const startSwipe = (event, profile, index) => {
     swipeData.dragging = false;
     const deltaX = swipeData.currentX - swipeData.startX;
     if (deltaX > 150) {
-      like(); // Right swipe (like)
+      like();
     } else if (deltaX < -150) {
-      dislike(); // Left swipe (dislike)
+      dislike();
     } else {
-      resetCard(index); // Reset card position if swipe is too small
+      resetCard(index);
     }
-    window.removeEventListener('mousemove', moveHandler);
-    window.removeEventListener('mouseup', endSwipe);
-    window.removeEventListener('touchmove', moveHandler);
-    window.removeEventListener('touchend', endSwipe);
+    window.removeEventListener("mousemove", moveHandler);
+    window.removeEventListener("mouseup", endSwipe);
+    window.removeEventListener("touchmove", moveHandler);
+    window.removeEventListener("touchend", endSwipe);
   };
 
-  window.addEventListener('mousemove', moveHandler);
-  window.addEventListener('mouseup', endSwipe);
-  window.addEventListener('touchmove', moveHandler);
-  window.addEventListener('touchend', endSwipe);
+  window.addEventListener("mousemove", moveHandler);
+  window.addEventListener("mouseup", endSwipe);
+  window.addEventListener("touchmove", moveHandler);
+  window.addEventListener("touchend", endSwipe);
 };
 
 const like = () => {
-  animateSwipe('like');
+  animateSwipe("like");
 };
 
 const dislike = () => {
-  animateSwipe('dislike');
+  animateSwipe("dislike");
 };
 
 const animateSwipe = (direction) => {
   const index = currentIndex.value;
   const profile = profiles.value[index];
-  profile.offsetX = direction === 'like' ? 400 : -400;
-  profile.rotate = direction === 'like' ? 30 : -30;
+  profile.offsetX = direction === "like" ? 400 : -400;
+  profile.rotate = direction === "like" ? 30 : -30;
   profile.opacity = 0;
   setTimeout(() => {
     profiles.value.splice(index, 1);
@@ -95,15 +152,8 @@ const resetCard = (index) => {
   profiles.value[index].rotate = 0;
   profiles.value[index].opacity = 1;
 };
-
-const manualSwipe = (direction) => {
-  if (direction === 'like') {
-    like();
-  } else {
-    dislike();
-  }
-};
 </script>
+
 
 <style scoped>
 /* Container */

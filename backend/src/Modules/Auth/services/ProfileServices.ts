@@ -232,8 +232,9 @@ class ProfileServices {
         throw new MatchaError("Profile not found", 404);
       }
 
-      // Get the initial swipe list
-      const swipeList = await profileRepository.getSwipeList(userId);
+      // Get the initial swipe list from the database (excluding the current user) and with add filter gender if user man return only women and vice versa 
+
+      const swipeList = await profileRepository.getSwipeList(userId, findProfile.gender);
 
       // Validate swipe list
       if (!swipeList || swipeList.length === 0) {
@@ -274,15 +275,18 @@ class ProfileServices {
             const profileImages = await profileRepository.getProfileImages(
               profile.id
             );
-            const profileImage =
-              profileImages && profileImages.length > 0
-                ? profileImages[0].image_url
-                : null;
+            // const profileImage =
+            //   profileImages && profileImages.length > 0
+            //     ? profileImages[0].image_url
+            //     : null;
+            const profileImage = profileImages.map(
+              (image: any) => image.image_url
+            );
 
             return {
               ...userdetails,
               myProfile: "dehbuwe",
-              profileImage,
+              images: profileImage,
               ...profileDetails,
             };
           } catch (fetchError) {
