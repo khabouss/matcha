@@ -1,6 +1,6 @@
 - send interests in response swip list
-- if user already matched dont show him in swip list
-- filter swip list based on interests and location
+- if user already matched dont show him in swip list V
+- filter swip list based on interests and location V
 - endpoint to match user (like user)
 - endpoint to unmatch user (dislike user)
 - response if user is matched when swiping

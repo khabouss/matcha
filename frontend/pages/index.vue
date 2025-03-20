@@ -8,7 +8,7 @@
         :style="{
           zIndex: profiles.length - index,
           transform: `translateX(${profile.offsetX}px) rotate(${profile.rotate}deg)`,
-          opacity: profile.opacity
+          opacity: profile.opacity,
         }"
         @mousedown="startSwipe($event, profile, index)"
         @touchstart="startSwipe($event, profile, index)"
@@ -33,7 +33,9 @@ const swipeData = reactive({
 // Function to get user location
 const getUserLocation = async () => {
   try {
-    const permission = await navigator.permissions.query({ name: "geolocation" });
+    const permission = await navigator.permissions.query({
+      name: "geolocation",
+    });
 
     if (permission.state === "granted") {
       console.log("Permission granted ✅");
@@ -42,7 +44,7 @@ const getUserLocation = async () => {
           (position) => {
             resolve({
               lat: position.coords.latitude,
-              lon: position.coords.longitude
+              lon: position.coords.longitude,
             });
           },
           (error) => {
@@ -58,7 +60,7 @@ const getUserLocation = async () => {
           (position) => {
             resolve({
               lat: position.coords.latitude,
-              lon: position.coords.longitude
+              lon: position.coords.longitude,
             });
           },
           (error) => {
@@ -80,11 +82,16 @@ const getUserLocation = async () => {
 // Fetch profiles and send location
 const fetchProfiles = async () => {
   const location = await getUserLocation();
+  console.log("location ==========>: ", location);
 
-  const { data, error } = await useCFetch("http://localhost:3001/profile/swipe-list", {
-    method: "GET",
-    params: { latitude: location.lat, longitude: location.lon }
-  });
+  const { data, error } = await useCFetch(
+    "http://localhost:3001/profile/swipe-list",
+    {
+      method: "GET",
+      params: { latitude: location.lat, longitude: location.lon },
+    }
+  );
+  console.log("error ==========>: ", error);
 
   if (data.value?.status === "success") {
     profiles.value = data?.value?.data?.swipeData;
@@ -95,11 +102,15 @@ const fetchProfiles = async () => {
 fetchProfiles();
 
 const startSwipe = (event, profile, index) => {
-  swipeData.startX = event.type === "mousedown" ? event.clientX : event.touches[0].clientX;
+  swipeData.startX =
+    event.type === "mousedown" ? event.clientX : event.touches[0].clientX;
   swipeData.dragging = true;
 
   const moveHandler = (moveEvent) => {
-    swipeData.currentX = moveEvent.type === "mousemove" ? moveEvent.clientX : moveEvent.touches[0].clientX;
+    swipeData.currentX =
+      moveEvent.type === "mousemove"
+        ? moveEvent.clientX
+        : moveEvent.touches[0].clientX;
     const deltaX = swipeData.currentX - swipeData.startX;
     profiles.value[index].offsetX = deltaX;
     profiles.value[index].rotate = deltaX / 10;
@@ -153,7 +164,6 @@ const resetCard = (index) => {
   profiles.value[index].opacity = 1;
 };
 </script>
-
 
 <style scoped>
 /* Container */

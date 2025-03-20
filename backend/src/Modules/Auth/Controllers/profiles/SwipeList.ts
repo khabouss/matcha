@@ -10,7 +10,16 @@ const swipeList = async (req: Request, res: Response, next: NextFunction) => {
       });
       return;
     }
-    const swipeData = await ProfileServices.getSwipeList(req.user.id);
+    const { latitude, longitude } = req.query;
+    console.log("============================");
+
+    console.log("latitude", latitude);
+    console.log("longitude", longitude);
+
+    const swipeData = await ProfileServices.getSwipeList(req.user.id, {
+      latitude: latitude ? parseFloat(latitude as string) : undefined,
+      longitude: longitude ? parseFloat(longitude as string) : undefined,
+    });
     res.status(200).json({
       status: "success",
       data: {

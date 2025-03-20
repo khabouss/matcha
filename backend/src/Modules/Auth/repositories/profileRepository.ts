@@ -4,19 +4,23 @@ class profileRepository {
   static async createProfile(profile: any) {
     console.log("profile >>>: ", profile);
 
+    // const query = `
+    //         INSERT INTO profiles (user_id, gender, sexual_preferences, biography, fame_rating, gps_location, neighborhood, allow_gps)
+    //         VALUES ($1, $2, $3, $4, $5, POINT($6, $7), $8, $9)
+    //         RETURNING *
+    //     `;
     const query = `
-            INSERT INTO profiles (user_id, gender, sexual_preferences, biography, fame_rating, gps_location, neighborhood, allow_gps)
-            VALUES ($1, $2, $3, $4, $5, POINT($6, $7), $8, $9)
-            RETURNING *
-        `;
+    INSERT INTO profiles (user_id, gender, sexual_preferences, biography, fame_rating, gps_location, neighborhood, allow_gps)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+    RETURNING *
+  `;
     const values = [
       profile.user_id,
       profile.gender,
       profile.sexual_preferences,
       profile.biography,
       profile.fame_rating || 0.0,
-      profile.gps_location?.lat || null,
-      profile.gps_location?.lng || null,
+      profile.gps_location ? JSON.stringify(profile.gps_location) : null,
       profile.neighborhood || null,
       profile.allow_gps || true,
     ];
@@ -143,20 +147,36 @@ class profileRepository {
     const row = await pool.query(query, values);
     return row.rows;
   }
-  static async getSwipeList(user_id: number, gender: string) {
+  static async getSwipeList(
+    user_id: number,
+    gender: string,
+    location?: { latitude?: number; longitude?: number }
+  ) {
+    //add gender to the query
     // const query = `
     //         SELECT * FROM profiles
-    //         WHERE user_id != $1
-    //     `;
-    //add gender to the query
-    const query = `
-            SELECT * FROM profiles
-            WHERE user_id != $1 AND
-            
-      `;
-    const values = [user_id, gender];
-    const row = await pool.query(query, values);
-    return row.rows;
+    //         WHERE user_id != $1 AND gender != $2
+
+    //   `;
+    // const values = [user_id, gender];
+    // const row = await pool.query(query, values);
+    // return row.rows;
+    let query = `SELECT * FROM profiles WHERE user_id != $1 AND gender != $2`;
+    const params: any[] = [user_id, gender];
+
+    // if (location?.latitude !== undefined && location?.longitude !== undefined) {
+    //   query += ` AND ST_DistanceSphere(
+    //     ST_SetSRID(ST_MakePoint(
+    //       gps_location->>'lng'::double precision,  -- Correctly cast longitude from JSONB to double precision
+    //       gps_location->>'lat'::double precision    -- Correctly cast latitude from JSONB to double precision
+    //     ), 4326), 
+    //     ST_SetSRID(ST_MakePoint($3::double precision, $4::double precision), 4326)
+    //   ) < 50000`; 
+
+    //   params.push(location.longitude, location.latitude);
+    // }
+    const row = await pool.query(query, params);
+    return row.rows ?? [];
   }
 }
 

@@ -224,7 +224,10 @@ class ProfileServices {
   //     throw new MatchaError(error.message, 500);
   //   }
   // }
-  static async getSwipeList(userId: number) {
+  static async getSwipeList(
+    userId: number,
+    location?: { latitude?: number; longitude?: number }
+  ) {
     try {
       // Find the current user's profile
       const findProfile = await profileRepository.findProfileByUserId(userId);
@@ -232,12 +235,18 @@ class ProfileServices {
         throw new MatchaError("Profile not found", 404);
       }
 
-      // Get the initial swipe list from the database (excluding the current user) and with add filter gender if user man return only women and vice versa 
+      // Get the initial swipe list from the database (excluding the current user) and with add filter gender if user man return only women and vice versa
 
-      const swipeList = await profileRepository.getSwipeList(userId, findProfile.gender);
+      const swipeList = await profileRepository.getSwipeList(
+        userId,
+        findProfile.gender,
+        location
+      );
 
       // Validate swipe list
       if (!swipeList || swipeList.length === 0) {
+        console.log("No potential matches found");
+
         return []; // Return empty array if no potential matches
       }
 

@@ -49,7 +49,7 @@
 
         <div class="form-group">
           <label for="interests">Interests:</label>
-          <input v-model="newInterest" @keyup.enter="addInterest" placeholder="Add interest and press Enter" />
+          <input v-model="newInterest" placeholder="Add interest and press Enter" />
           <div class="tags">
             <span v-for="interest in user.interests" :key="interest" class="tag">#{{ interest }}</span>
           </div>
@@ -126,7 +126,7 @@ const updateProfile = async () => {
     gender: user.value.gender,
     sexual_preferences: user.value.sexual_preferences,
     biography: user.value.biography,
-    interests: user.value.interests,
+    interests: newInterest.value,
     images: presignedUrls.value
       .filter((url) => url !== null) // Filter out null URLs
       .map((url) => {

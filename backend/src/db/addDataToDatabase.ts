@@ -8,27 +8,27 @@ async function seedDatabase() {
   try {
     const usersData = [
       {
-        userName: "john_doe",
+        userName: "alice_wonder",
         password: "hashed_password1",
-        first_name: "John",
-        last_name: "Doe",
-        email: "john@example.com",
+        first_name: "Alice",
+        last_name: "Wonder",
+        email: "alice@example.com",
         isVerified: true,
       },
       {
-        userName: "jane_doe",
+        userName: "bob_builder",
         password: "hashed_password2",
-        first_name: "Jane",
-        last_name: "Doe",
-        email: "jane@example.com",
+        first_name: "Bob",
+        last_name: "Builder",
+        email: "bob@example.com",
         isVerified: false,
       },
       {
-        userName: "mark_smith",
+        userName: "charlie_brown",
         password: "hashed_password3",
-        first_name: "Mark",
-        last_name: "Smith",
-        email: "mark@example.com",
+        first_name: "Charlie",
+        last_name: "Brown",
+        email: "charlie@example.com",
         isVerified: true,
       },
     ];
@@ -89,15 +89,17 @@ async function seedDatabase() {
     for (const profile of profilesData) {
       const res = await pool.query(
         `INSERT INTO profiles (user_id, gender, sexual_preferences, biography, fame_rating, gps_location, neighborhood, allow_gps)
-         VALUES ($1, $2, $3, $4, $5, POINT($6, $7), $8, $9) RETURNING id`,
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`,
         [
           profile.user_id,
           profile.gender,
           profile.sexual_preferences,
           profile.biography,
           profile.fame_rating,
-          profile.gps_location.lat,
-          profile.gps_location.lng,
+          JSON.stringify({
+            lat: profile.gps_location.lat,
+            lng: profile.gps_location.lng,
+          }), // Converting to JSONB
           profile.neighborhood,
           profile.allow_gps,
         ]
