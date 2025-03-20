@@ -54,14 +54,29 @@ class ProfileServices {
     findProfile.images = images;
     return findProfile;
   }
-  static async getProfileUsers(profileId: string) {
+  static async getProfileUsers(profile_username: string) {
+    const finduser = await UserRepository.findByUserName(profile_username);
+    console.log("finduser: ", finduser);
+    if (!finduser) {
+      throw new MatchaError("User not found", 404);
+    }
+
     // const findProfile = await profileRepository.findProfileById(profileId);
     const findProfile = await profileRepository.findProfileByUserNume(
-      profileId
+      String(finduser.id)
     );
     if (!findProfile) {
       throw new MatchaError("Profile not found", 404);
     }
+    console.log("findProfile:>>>>>>>>>>>>::::>>>: ", findProfile);
+    const getimagesUser = await profileRepository.getProfileImages(
+      findProfile.id
+    );
+    const images = getimagesUser.map((image: any) => image.image_url);
+    findProfile.images = images;
+    const userinfo = await UserRepository.findById(findProfile.user_id);
+    const { id, isverified, password, created_At, ...user } = userinfo;
+    findProfile.userinfo = user;
     return findProfile;
   }
   static async setViewerProfile(profileId: number, viewerId: number) {
@@ -294,7 +309,7 @@ class ProfileServices {
 
             return {
               ...userdetails,
-              myProfile: "dehbuwe",
+              myProfile: findProfile,
               images: profileImage,
               ...profileDetails,
             };

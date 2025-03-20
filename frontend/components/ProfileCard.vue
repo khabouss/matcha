@@ -1,31 +1,45 @@
     <template>
     <div @click="changeRoute">
-        <img v-if="props.profile?.image?.length > 0" :src="'http://localhost:4566/'+props.profile.image[0]" alt="Profile image"
+        <img v-if="props.profile?.images?.length > 0" :src="'http://localhost:4566/'+props.profile.images[0]" alt="Profile image"
             class="profile-image" />
         <div class="profile-info">
-            <h3>{{ props.profile.first_name }}, {{ props.profile.age }}</h3>
+            <h3>{{ props.profile.userinfo.first_name }} {{ props.profile.userinfo.last_name }} ({{ props.profile.gender }})</h3>
             <p>{{ props.profile.biography }}</p>
         </div>
         <div v-if="route.path !== '/'">
-            <img v-if="props.profile?.image?.length > 1" :src="'http://localhost:4566/'+props.profile.image[1]" alt="Profile image"
+            <img v-if="props.profile?.images?.length > 1" :src="'http://localhost:4566/'+props.profile.images[1]" alt="Profile image"
                 class="profile-image" />
             <div class="profile-info">
                 <h4>About me</h4>
                 <div class="about">
-                    <p v-for="key of props.profile.about" class="profile-tag">{{ key }}</p>
+                    <p v-for="key of props.profile.interests" class="profile-tag">{{ key }}</p>
                 </div>
             </div>
-            <img v-if="props.profile?.image?.length > 2" :src="'http://localhost:4566/'+props.profile.image[2]" alt="Profile image"
+            <img v-if="props.profile?.images?.length > 2" :src="'http://localhost:4566/'+props.profile.images[2]" alt="Profile image"
                 class="profile-image" />
-            <img v-if="props.profile?.image?.length > 3" :src="'http://localhost:4566/'+props.profile.image[3]" alt="Profile image"
+            <img v-if="props.profile?.images?.length > 3" :src="'http://localhost:4566/'+props.profile.images[3]" alt="Profile image"
                 class="profile-image" />
-            <img v-if="props.profile?.image?.length > 4" :src="'http://localhost:4566/'+props.profile.image[4]" alt="Profile image"
+            <img v-if="props.profile?.images?.length > 4" :src="'http://localhost:4566/'+props.profile.images[4]" alt="Profile image"
                 class="profile-image" />
 
             <div class="profile-info">
                 <h4>Online status</h4>
                 <div class="about">
                     <p class="profile-tag">{{ props.profile.lastOnlineStatus }}</p>
+                </div>
+            </div>
+
+            <div class="profile-info">
+                <h4>Sexual Preference</h4>
+                <div class="about">
+                    <p class="profile-tag">{{ props.profile.sexual_preferences }}</p>
+                </div>
+            </div>
+
+            <div class="profile-info">
+                <h4>Fame</h4>
+                <div class="about">
+                    <p class="profile-tag">{{ props.profile.fame_rating }}</p>
                 </div>
             </div>
 

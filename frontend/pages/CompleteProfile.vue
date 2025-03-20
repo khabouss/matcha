@@ -126,7 +126,7 @@ const updateProfile = async () => {
     gender: user.value.gender,
     sexual_preferences: user.value.sexual_preferences,
     biography: user.value.biography,
-    interests: newInterest.value,
+    interests: newInterest.value.split(',').map((interest) => interest.trim()),
     images: presignedUrls.value
       .filter((url) => url !== null) // Filter out null URLs
       .map((url) => {

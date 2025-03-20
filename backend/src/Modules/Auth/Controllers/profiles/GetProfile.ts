@@ -32,34 +32,40 @@ const GetProfileUsers = async (
       await ProfileServices.setViewerProfile(Number(profile.id), viewerId);
     }
 
-    const { user_id, gps_location, allow_gps, ...returndata } = profile;
+
+    const { user_id, gps_location, allow_gps, password, email, ...returndata } =
+      profile;
     const resData = {
-      name: "Alice khabouss",
-      isMatch: true,
-      lastOnlineStatus: "Two weeks ago",
-      about: {
-        gender: "Man",
-        SP: "Straight",
-        interest1: "Jogging",
-        interest2: "Coffee",
-        intereset3: "Movies",
-        fame: "fame: 3.12",
-      },
-      languages: ["english", "arabic", "russian"],
-      lastLocation: "Marrakech",
-      age: 25,
-      bio: "Love traveling and photography.",
-      image: [
-        "https://picsum.photos/400/600?random=1",
-        "https://picsum.photos/400/600?random=1",
-        "https://picsum.photos/400/600?random=1",
-        "https://picsum.photos/400/600?random=1",
-        "https://picsum.photos/400/600?random=1",
-      ],
-      offsetX: 0,
-      rotate: 0,
-      opacity: 1,
+      ...returndata,
     };
+
+    // const resData = {
+    //   name: "Alice khabouss",
+    //   isMatch: true,
+    //   lastOnlineStatus: "Two weeks ago",
+    //   about: {
+    //     gender: "Man",
+    //     SP: "Straight",
+    //     interest1: "Jogging",
+    //     interest2: "Coffee",
+    //     intereset3: "Movies",
+    //     fame: "fame: 3.12",
+    //   },
+    //   languages: ["english", "arabic", "russian"],
+    //   lastLocation: "Marrakech",
+    //   age: 25,
+    //   bio: "Love traveling and photography.",
+    //   image: [
+    //     "https://picsum.photos/400/600?random=1",
+    //     "https://picsum.photos/400/600?random=1",
+    //     "https://picsum.photos/400/600?random=1",
+    //     "https://picsum.photos/400/600?random=1",
+    //     "https://picsum.photos/400/600?random=1",
+    //   ],
+    //   offsetX: 0,
+    //   rotate: 0,
+    //   opacity: 1,
+    // };
     res.status(200).json({
       status: "success",
       data: {

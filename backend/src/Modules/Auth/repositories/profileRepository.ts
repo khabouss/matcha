@@ -10,8 +10,8 @@ class profileRepository {
     //         RETURNING *
     //     `;
     const query = `
-    INSERT INTO profiles (user_id, gender, sexual_preferences, biography, fame_rating, gps_location, neighborhood, allow_gps)
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+    INSERT INTO profiles (user_id, gender, sexual_preferences, biography, fame_rating, gps_location, neighborhood, allow_gps,interests)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
     RETURNING *
   `;
     const values = [
@@ -23,6 +23,7 @@ class profileRepository {
       profile.gps_location ? JSON.stringify(profile.gps_location) : null,
       profile.neighborhood || null,
       profile.allow_gps || true,
+      Array.isArray(profile.interests) ? profile.interests : [],
     ];
     const row = await pool.query(query, values);
     return row.rows[0];
@@ -89,10 +90,14 @@ class profileRepository {
   }
 
   static async findProfileByUserNume(user_name: string) {
+    // const query = `
+    //         SELECT * FROM profiles
+    //         JOIN users ON profiles.user_id = users.id
+    //         WHERE users.username = $1
+    //     `;
     const query = `
             SELECT * FROM profiles
-            JOIN users ON profiles.user_id = users.id
-            WHERE users.username = $1
+            WHERE user_id = $1
         `;
     const values = [user_name];
     const row = await pool.query(query, values);
@@ -169,9 +174,9 @@ class profileRepository {
     //     ST_SetSRID(ST_MakePoint(
     //       gps_location->>'lng'::double precision,  -- Correctly cast longitude from JSONB to double precision
     //       gps_location->>'lat'::double precision    -- Correctly cast latitude from JSONB to double precision
-    //     ), 4326), 
+    //     ), 4326),
     //     ST_SetSRID(ST_MakePoint($3::double precision, $4::double precision), 4326)
-    //   ) < 50000`; 
+    //   ) < 50000`;
 
     //   params.push(location.longitude, location.latitude);
     // }

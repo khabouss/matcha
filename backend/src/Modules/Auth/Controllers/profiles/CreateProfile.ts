@@ -19,6 +19,7 @@ const createProfileController = async (
     neighborhood,
     allow_gps,
     images,
+    interests,
   } = req.body;
 
   console.log("req.body: ", req.body);
@@ -45,6 +46,7 @@ const createProfileController = async (
       neighborhood,
       allow_gps,
       images,
+      interests,
     };
     const profile = await ProfileServices.createProfile(dataProfile);
     console.log("profile: ", profile);

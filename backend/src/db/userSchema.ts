@@ -69,7 +69,7 @@ CREATE TABLE IF NOT EXISTS profiles (
     fame_rating DECIMAL(3, 2) DEFAULT 0.00,  -- Fame rating from 0.00 to 100.00
     gps_location JSONB,  -- Stores latitude and longitude
     neighborhood VARCHAR(100),
-    interests JSONB DEFAULT '[]'::JSONB,
+    interests TEXT[],  -- Array of user interests
     allow_gps BOOLEAN DEFAULT TRUE,  -- Flag if user allows GPS tracking
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
