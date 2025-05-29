@@ -125,7 +125,7 @@ class profileRepository {
     const profileQuery = `
             UPDATE profiles
             SET gender = $1, sexual_preferences = $2, biography = $3, fame_rating = $4, 
-                gps_location = POINT($5, $6), neighborhood = $7, allow_gps = $8
+                gps_location = $5, neighborhood = $6, allow_gps = $7, interests = $8
             WHERE user_id = $9
             RETURNING *;
         `;
@@ -134,10 +134,10 @@ class profileRepository {
       profile.sexual_preferences,
       profile.biography,
       profile.fame_rating || 0.0,
-      profile.gps_location?.lat || null,
-      profile.gps_location?.lng || null,
+      profile.gps_location ? JSON.stringify(profile.gps_location) : null,
       profile.neighborhood || null,
       profile.allow_gps ?? true,
+      Array.isArray(profile.interests) ? profile.interests : [],
       profile.user_id,
     ];
     const profileRow = await pool.query(profileQuery, profileValues);
@@ -157,16 +157,18 @@ class profileRepository {
     gender: string,
     location?: { latitude?: number; longitude?: number }
   ) {
-    //add gender to the query
-    // const query = `
-    //         SELECT * FROM profiles
-    //         WHERE user_id != $1 AND gender != $2
-
-    //   `;
-    // const values = [user_id, gender];
-    // const row = await pool.query(query, values);
-    // return row.rows;
-    let query = `SELECT * FROM profiles WHERE user_id != $1 AND gender != $2`;
+    let query = `
+      SELECT p.* 
+      FROM profiles p
+      WHERE p.user_id != $1 
+      AND p.gender != $2
+      AND NOT EXISTS (
+        SELECT 1 
+        FROM profile_likes pl 
+        WHERE (pl.liker_user_id = $1 AND pl.liked_profile_id = p.id)
+           OR (pl.liker_user_id = p.user_id AND pl.liked_profile_id = $1)
+      )
+    `;
     const params: any[] = [user_id, gender];
 
     // if (location?.latitude !== undefined && location?.longitude !== undefined) {
@@ -182,6 +184,79 @@ class profileRepository {
     // }
     const row = await pool.query(query, params);
     return row.rows ?? [];
+  }
+
+  static async likeProfile(likerUserId: number, likedProfileId: number) {
+    const query = `
+      INSERT INTO profile_likes (liker_user_id, liked_profile_id)
+      VALUES ($1, $2)
+      ON CONFLICT (liker_user_id, liked_profile_id) DO NOTHING
+      RETURNING *;
+    `;
+    const values = [likerUserId, likedProfileId];
+    const row = await pool.query(query, values);
+    return row.rows[0];
+  }
+
+  static async checkMatch(likerUserId: number, likedProfileId: number) {
+    const query = `
+      SELECT EXISTS (
+        SELECT 1 FROM profile_likes
+        WHERE liker_user_id = $2 AND liked_profile_id = $1
+      ) as is_match;
+    `;
+    const values = [likerUserId, likedProfileId];
+    const row = await pool.query(query, values);
+    return row.rows[0]?.is_match || false;
+  }
+
+  static async getMatches(userId: number) {
+    const query = `
+      SELECT DISTINCT 
+        p.id as profile_id,
+        p.user_id,
+        u.userName,
+        u.first_name,
+        u.last_name,
+        u.email,
+        p.gender,
+        p.sexual_preferences,
+        p.biography,
+        p.fame_rating,
+        p.neighborhood,
+        p.interests
+      FROM profile_likes pl1
+      JOIN profile_likes pl2 ON pl1.liker_user_id = pl2.liked_profile_id 
+        AND pl1.liked_profile_id = pl2.liker_user_id
+      JOIN profiles p ON p.id = pl2.liker_user_id
+      JOIN users u ON u.id = p.user_id
+      WHERE pl1.liker_user_id = $1;
+    `;
+    const values = [userId];
+    const row = await pool.query(query, values);
+    return row.rows;
+  }
+
+  static async getLikedProfiles(userId: number) {
+    const query = `
+      SELECT p.*, u.userName, u.first_name, u.last_name, u.email
+      FROM profile_likes pl
+      JOIN profiles p ON p.id = pl.liked_profile_id
+      JOIN users u ON u.id = p.user_id
+      WHERE pl.liker_user_id = $1;
+    `;
+    const values = [userId];
+    const row = await pool.query(query, values);
+    return row.rows;
+  }
+
+  static async unmatchProfile(userId: number, unmatchedProfileId: number) {
+    const unmatchQuery = `
+      DELETE FROM profile_likes
+      WHERE (liker_user_id = $1 AND liked_profile_id = $2)
+         OR (liker_user_id = $2 AND liked_profile_id = $1);
+    `;
+    await pool.query(unmatchQuery, [userId, unmatchedProfileId]);
   }
 }
 

@@ -1,3 +1,5 @@
+#!/bin/sh
 npm install
-npm run dev 
+npm install -g nodemon
+npm run dev
 tail -f /dev/null

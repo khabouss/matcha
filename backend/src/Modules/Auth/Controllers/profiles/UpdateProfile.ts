@@ -27,6 +27,7 @@ const updateProfile = async (
       neighborhood,
       allow_gps,
       images,
+      interests
     } = req.body;
 
     const dataProfile = {
@@ -42,7 +43,11 @@ const updateProfile = async (
       neighborhood,
       allow_gps,
       images,
+      interests
     };
+
+    console.log('Received profile data:', dataProfile); // Debug log
+
     const profile = await ProfileServices.updateProfile(dataProfile);
     res.status(200).json({
       status: "success",
@@ -52,11 +57,11 @@ const updateProfile = async (
       },
     });
   } catch (error: any) {
+    console.error('Profile update error:', error); // Debug log
     res.status(400).json({
       status: "error",
       error_message: error.message,
     });
-    next(error);
   }
 };
 export default updateProfile;

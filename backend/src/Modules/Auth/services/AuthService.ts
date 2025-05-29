@@ -2,7 +2,7 @@ import { ulid } from 'ulid';
 import { UserRepository } from '../repositories/userRepository';
 import { validateUserSignup } from '../validators/userValidator';
 const { sendEmails } = require('../utils/mailer');
-import bcrypt from 'bcrypt';
+import bcryptjs from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import SessionRepository from '../repositories/sessionRepository';
 import ResetPasswordRepository from '../repositories/resetPasswordRepository';
@@ -60,7 +60,7 @@ class AuthService {
         if (findbyUserName) {
             throw new Error('User already exists :)');
         }
-        const hashedPassword = await bcrypt.hash(password, 10);
+        const hashedPassword = await bcryptjs.hash(password, 10);
         const user = await UserRepository.createUser(
             userName,
             hashedPassword,
@@ -94,7 +94,7 @@ class AuthService {
         if (!user) {
             throw new Error('User not found');
         }
-        const isPasswordMatch = await bcrypt.compare(password, user.password);
+        const isPasswordMatch = await bcryptjs.compare(password, user.password);
         if (!isPasswordMatch) {
             throw new Error('Invalid password');
         }
@@ -114,7 +114,7 @@ class AuthService {
         if (findToken.expiresat < new Date()) {
             throw new Error('Token expired');
         }
-        const hashedPassword = await bcrypt.hash(password, 10);
+        const hashedPassword = await bcryptjs.hash(password, 10);
         console.log(hashedPassword);
 
         await UserRepository.updatePassword(

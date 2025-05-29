@@ -157,13 +157,18 @@ class ProfileServices {
     if (!findProfile) {
       throw new MatchaError("Profile not found", 404);
     }
-    const updateProfile = await profileRepository.updateProfile(profile);
+
+    // Update the profile with all fields including interests
+    const updateProfile = await profileRepository.updateProfile({
+      ...profile,
+      interests: Array.isArray(profile.interests) ? profile.interests : []
+    });
+
     if (!updateProfile) {
       throw new MatchaError("Profile not updated", 400);
     }
-    console.log("profile: ", profile);
 
-    // if (profile.fileName || profile.lastName || profile.email) {
+    // Update user information
     const updateUser = await UserRepository.UpdateUser(
       profile.user_id,
       profile.firstName,
@@ -173,28 +178,25 @@ class ProfileServices {
     if (!updateUser) {
       throw new MatchaError("User not updated", 400);
     }
-    if (profile.images.length !== 0) {
-      const deleteImages = await profileRepository.deleteProfileImages(
-        findProfile.id
-      );
-      if (!deleteImages) {
-        throw new MatchaError("Images not deleted", 400);
-      }
-      for (let i = 0; i < profile.images.length; i++) {
-        if (!profile.images[i]) {
-          throw new MatchaError("Image url is required", 400);
-        }
-        const image = {
-          profile_id: findProfile.id,
-          image_url: profile.images[i],
-        };
-        const createImage = await profileRepository.putProfileImages(
-          image.profile_id,
-          image.image_url
+
+    // Handle images - only update if there are new images
+    const validImages = profile.images.filter((img: string) => img !== null && img !== '');
+    if (validImages.length > 0) {
+      // Delete existing images
+      await profileRepository.deleteProfileImages(findProfile.id);
+      
+      // Add new images
+      for (const imageUrl of validImages) {
+        await profileRepository.putProfileImages(
+          findProfile.id,
+          imageUrl
         );
       }
     }
-    return updateProfile;
+
+    // Get the updated profile with all fields
+    const updatedProfile = await this.getMyProfile(profile.user_id);
+    return updatedProfile;
   }
   // static async getSwipeList(userId: number) {
   //   try {
@@ -329,6 +331,102 @@ class ProfileServices {
       console.error("Error in getSwipeList:", error);
       throw new MatchaError(error.message, 500);
     }
+  }
+  static async likeProfile(likerUserId: number, likedProfileId: number) {
+    try {
+      // Check if the liker has a profile with images
+      const likerProfile = await profileRepository.findProfileByUserId(likerUserId);
+      if (!likerProfile) {
+        throw new MatchaError("You must have a profile to like others", 400);
+      }
+
+      const likerImages = await profileRepository.getProfileImages(likerProfile.id);
+      if (!likerImages || likerImages.length === 0) {
+        throw new MatchaError("You must have at least one profile picture to like others", 400);
+      }
+
+      // Check if the liked profile exists
+      const likedProfile = await profileRepository.findProfileById(likedProfileId);
+      if (!likedProfile) {
+        throw new MatchaError("Profile not found", 404);
+      }
+
+      // Add the like
+      const like = await profileRepository.likeProfile(likerUserId, likedProfileId);
+      
+      // Check if it's a match
+      const isMatch = await profileRepository.checkMatch(likerUserId, likedProfileId);
+      
+      // Get the liked profile's user info for the response
+      const likedUser = await UserRepository.findById(likedProfile.user_id);
+      const { password, ...userInfo } = likedUser;
+
+      return {
+        like,
+        isMatch,
+        likedProfile: {
+          ...likedProfile,
+          user: userInfo
+        }
+      };
+    } catch (error: any) {
+      throw new MatchaError(error.message, error.statusCode || 500);
+    }
+  }
+
+  static async getMatches(userId: number) {
+    try {
+      const matches = await profileRepository.getMatches(userId);
+      
+      // Get profile images for each match
+      const matchesWithImages = await Promise.all(
+        matches.map(async (match) => {
+          const images = await profileRepository.getProfileImages(match.profile_id);
+          return {
+            ...match,
+            images: images.map(img => img.image_url)
+          };
+        })
+      );
+
+      return matchesWithImages;
+    } catch (error: any) {
+      throw new MatchaError(error.message, error.statusCode || 500);
+    }
+  }
+
+  static async getLikedProfiles(userId: number) {
+    try {
+      const likedProfiles = await profileRepository.getLikedProfiles(userId);
+      
+      // Get profile images for each liked profile
+      const profilesWithImages = await Promise.all(
+        likedProfiles.map(async (profile) => {
+          const images = await profileRepository.getProfileImages(profile.id);
+          return {
+            ...profile,
+            images: images.map(img => img.image_url)
+          };
+        })
+      );
+
+      return profilesWithImages;
+    } catch (error: any) {
+      throw new MatchaError(error.message, error.statusCode || 500);
+    }
+  }
+
+  static async unmatchProfile(userId: number, unmatchedProfileId: number) {
+    // Verify both profiles exist
+    const userProfile = await profileRepository.findProfileByUserId(userId);
+    const unmatchedProfile = await profileRepository.findProfileByUserId(unmatchedProfileId);
+
+    if (!userProfile || !unmatchedProfile) {
+      throw new MatchaError('Profile not found', 404);
+    }
+
+    // Remove the like connection between both profiles
+    await profileRepository.unmatchProfile(userId, unmatchedProfileId);
   }
 }
 

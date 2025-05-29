@@ -7,11 +7,18 @@ const verifyAccount = async (
   next: NextFunction
 ) => {
   const { token } = req.body;
+  
+  if (!token) {
+    return res.status(400).json({
+      status: "error",
+      error_message: "Token is required"
+    });
+  }
+
   try {
     const user = await AuthService.verifyAccount(token);
-    console.log("user:", user);
-
-    res.status(200).json({
+    
+    return res.status(200).json({
       status: "success",
       data: {
         message: "Account verified successfully!",
@@ -19,11 +26,10 @@ const verifyAccount = async (
       },
     });
   } catch (error: any) {
-    res.status(400).json({
+    return res.status(400).json({
       status: "error",
       error_message: error.message,
     });
-    next(error);
   }
 };
 

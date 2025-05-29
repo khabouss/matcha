@@ -2,6 +2,7 @@ import {
   CreateBucketCommand,
   HeadBucketCommand,
   PutBucketCorsCommand,
+  PutBucketPolicyCommand,
   S3Client,
 } from "@aws-sdk/client-s3";
 import app from "./app";
@@ -29,34 +30,31 @@ export const s3Client = new S3Client({
 });
 const bucketName = "test-bucket";
 
-const createBucket = async () => {
-  try {
-    // Check if the bucket already exists
-    await s3Client.send(new HeadBucketCommand({ Bucket: bucketName }));
-    console.log(`Bucket "${bucketName}" already exists.`);
-    await setBucketCors(bucketName);
-  } catch (error: any) {
-    if (error.name === "NotFound") {
-      // If the bucket doesn't exist, create it
-      await s3Client.send(new CreateBucketCommand({ Bucket: bucketName }));
-      console.log(`Bucket "${bucketName}" created.`);
-      await setBucketCors(bucketName);
-    } else {
-      console.error(error);
-    }
-  }
-};
 const setBucketCors = async (bucketName: string) => {
   const corsParams = {
     Bucket: bucketName,
     CORSConfiguration: {
       CORSRules: [
         {
-          AllowedHeaders: ["*"],
+          AllowedHeaders: [
+            "*",
+            "Content-Type",
+            "x-amz-acl",
+            "x-amz-content-sha256",
+            "x-amz-date",
+            "x-amz-security-token",
+            "Origin"
+          ],
           AllowedMethods: ["PUT", "GET", "POST", "HEAD", "DELETE"],
-          AllowedOrigins: ["*"],
-          ExposeHeaders: ["ETag"],
-          MaxAgeSeconds: 3000,
+          AllowedOrigins: ["http://localhost:3002"],
+          ExposeHeaders: [
+            "ETag",
+            "Content-Length",
+            "Content-Type",
+            "x-amz-request-id",
+            "x-amz-id-2"
+          ],
+          MaxAgeSeconds: 3600,
         },
       ],
     },
@@ -70,14 +68,64 @@ const setBucketCors = async (bucketName: string) => {
   }
 };
 
+const setBucketPolicy = async (bucketName: string) => {
+  const policy = {
+    Version: "2012-10-17",
+    Statement: [
+      {
+        Sid: "PublicReadGetObject",
+        Effect: "Allow",
+        Principal: "*",
+        Action: ["s3:GetObject"],
+        Resource: [`arn:aws:s3:::${bucketName}/*`]
+      },
+      {
+        Sid: "PublicWritePutObject",
+        Effect: "Allow",
+        Principal: "*",
+        Action: ["s3:PutObject"],
+        Resource: [`arn:aws:s3:::${bucketName}/*`]
+      }
+    ]
+  };
+
+  try {
+    await s3Client.send(new PutBucketPolicyCommand({
+      Bucket: bucketName,
+      Policy: JSON.stringify(policy)
+    }));
+    console.log("Bucket policy applied successfully.");
+  } catch (error) {
+    console.error("Error setting bucket policy:", error);
+  }
+};
+
+const createBucket = async () => {
+  try {
+    // Check if the bucket already exists
+    await s3Client.send(new HeadBucketCommand({ Bucket: bucketName }));
+    console.log(`Bucket "${bucketName}" already exists.`);
+    await setBucketCors(bucketName);
+    await setBucketPolicy(bucketName);
+  } catch (error: any) {
+    if (error.name === "NotFound") {
+      // If the bucket doesn't exist, create it
+      await s3Client.send(new CreateBucketCommand({ Bucket: bucketName }));
+      console.log(`Bucket "${bucketName}" created.`);
+      await setBucketCors(bucketName);
+      await setBucketPolicy(bucketName);
+    } else {
+      console.error(error);
+    }
+  }
+};
+
 const startServer = async () => {
   try {
     await createSchemas(); // Create all schemas before starting the server
     console.log("Schemas created successfully");
-
     await createBucket();
     console.log("Bucket created successfully");
-
     app.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);
     });

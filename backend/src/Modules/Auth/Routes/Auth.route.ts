@@ -1,4 +1,4 @@
-import express, { Router, NextFunction, Request, Response } from 'express';
+import express, { Router, NextFunction, Request, Response, RequestHandler } from 'express';
 import { UserRepository } from '../repositories/userRepository';
 import { validateUserSignup } from '../validators/userValidator';
 import { ulid } from 'ulid';
@@ -12,13 +12,26 @@ import { authMiddleware } from '../../../middleware/authMiddleware';
 import newPassword from '../Controllers/Auth/NewPassword';
 const { sendEmails } = require('../utils/mailer');
 
-const attachAuthRoute = (router: Router) => {
-    router.post('/sign-in', signIn);
-    router.post('/sign-up', createAccount);
-    router.post('/verify-account', verifyAccount);
-    router.post('/reset-password', resetPassword);
-    router.post('/refresh-token', refreshToken);
-    router.post('/new-password', newPassword);
+// Helper type to convert our handlers to Express RequestHandler
+type AsyncRequestHandler = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => Promise<any>;
+
+const wrapAsync = (fn: AsyncRequestHandler): RequestHandler => {
+  return (req: Request, res: Response, next: NextFunction) => {
+    Promise.resolve(fn(req, res, next)).catch(next);
+  };
+};
+
+const attachAuthRoute = (router: Router): void => {
+    router.post('/sign-in', wrapAsync(signIn));
+    router.post('/sign-up', wrapAsync(createAccount));
+    router.post('/verify-account', wrapAsync(verifyAccount));
+    router.post('/reset-password', wrapAsync(resetPassword));
+    router.post('/refresh-token', wrapAsync(refreshToken));
+    router.post('/new-password', wrapAsync(newPassword));
     router.post('/protected', authMiddleware, (req: Request, res: Response) => {
         res.status(200).json({
             status: 'success',

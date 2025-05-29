@@ -9,6 +9,19 @@ import multer from "multer";
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
+// Extend the Express Request type to include user
+declare global {
+    namespace Express {
+        interface Request {
+            user?: {
+                id: number;
+                email: string;
+                username: string;
+            } | null;
+        }
+    }
+}
+
 export const authMiddleware = async (
   req: Request,
   res: Response,
@@ -55,6 +68,7 @@ export const authMiddleware = async (
     req.user = {
       id: users.id,
       email: users.email,
+      username: users.userName,
     };
 
     return next();

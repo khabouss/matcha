@@ -27,20 +27,30 @@ services:
       - localstack
     ports:
       - "3001:3001"
+    environment:
+      - NODE_ENV=development
+      - AWS_ENDPOINT_URL=http://localstack:4566
     volumes:
       - ./backend:/app  # Mount backend source code for HMR
     networks:
       - app-network
 
   frontend:
+    container_name: frontend
     build:
       context: ./frontend
     ports:
-      - "3000:3000"
+      - "3002:3002"
+    environment:
+      - NODE_ENV=development
+      - HOST=0.0.0.0
+      - PORT=3002
+      - NUXT_PUBLIC_API_BASE=http://localhost:3001
     depends_on:
       - backend
     volumes:
       - ./frontend:/app  # Mount frontend source code for HMR
+      - /app/node_modules  # Preserve node_modules in container
     networks:
       - app-network
 
@@ -50,15 +60,37 @@ services:
     ports:
       - "4566:4566"            # LocalStack Gateway
     environment:
-      # LocalStack configuration: https://docs.localstack.cloud/references/configuration/
-      - DEBUG=${DEBUG:-0}
+      # LocalStack configuration
+      - DEBUG=1
       - AWS_REGION=us-east-1
+      - SERVICES=s3
+      - DEFAULT_REGION=us-east-1
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - LAMBDA_EXECUTOR=docker
+      - PERSISTENCE=1
+      # CORS Configuration
+      - CORS_ALLOW_ORIGIN=http://localhost:3002
+      - CORS_ALLOW_HEADERS=Content-Type,x-amz-acl,x-amz-content-sha256,x-amz-date,x-amz-security-token,Origin
+      - CORS_ALLOW_METHODS=GET,PUT,POST,DELETE,HEAD
+      - CORS_EXPOSE_HEADERS=ETag,Content-Length,Content-Type,x-amz-request-id,x-amz-id-2
+      - CORS_MAX_AGE=3600
+      - ENABLE_CORS_HEADERS=true
+      # Additional settings
+      - S3_ENDPOINT_URL=http://localhost:4566
+      - S3_USE_SSL=false
+      - S3_VERIFY_SSL=false
+      - S3_FORCE_PATH_STYLE=true
+      # DNS settings
+      - DNS_RESOLVER=8.8.8.8
+      - DNS_RESOLVER_IP=8.8.8.8
     volumes:
       - "${LOCALSTACK_VOLUME_DIR:-./volume}:/var/lib/localstack"
       - "/var/run/docker.sock:/var/run/docker.sock"
     networks:
       - app-network
-  
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
 
 volumes:
   postgres_data:
@@ -66,3 +98,7 @@ volumes:
 networks:
   app-network:
     driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.20.0.0/16

@@ -107,7 +107,8 @@ CREATE TABLE IF NOT EXISTS profile_likes (
     liked_profile_id INT NOT NULL,
     liked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (liker_user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (liked_profile_id) REFERENCES profiles(id) ON DELETE CASCADE
+    FOREIGN KEY (liked_profile_id) REFERENCES profiles(id) ON DELETE CASCADE,
+    UNIQUE (liker_user_id, liked_profile_id)
 )
 `;
 
@@ -125,5 +126,30 @@ export const createUserSchema = async () => {
     console.log("users table created");
   } catch (error) {
     console.log(error);
+  }
+};
+
+export const dropAndRecreateTables = async () => {
+  const client = await pool.connect();
+  try {
+    // Drop tables in reverse order of dependencies
+    await client.query('DROP TABLE IF EXISTS profile_likes CASCADE');
+    await client.query('DROP TABLE IF EXISTS profile_views CASCADE');
+    await client.query('DROP TABLE IF EXISTS profile_images CASCADE');
+    await client.query('DROP TABLE IF EXISTS profiles CASCADE');
+    await client.query('DROP TABLE IF EXISTS sessions CASCADE');
+    await client.query('DROP TABLE IF EXISTS reset_password_tokens CASCADE');
+    await client.query('DROP TABLE IF EXISTS verification_tokens CASCADE');
+    await client.query('DROP TABLE IF EXISTS users CASCADE');
+
+    // Recreate tables
+    await createUserSchema();
+    
+    console.log("Tables dropped and recreated successfully");
+  } catch (error) {
+    console.error("Error dropping and recreating tables:", error);
+    throw error;
+  } finally {
+    client.release();
   }
 };
